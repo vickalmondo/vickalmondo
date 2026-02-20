@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stage, useGLTF, ContactShadows, Html, useProgress } from '@react-three/drei';
+import { OrbitControls, useGLTF, ContactShadows, Html, useProgress, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
@@ -22,12 +22,13 @@ function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
     if (group.current && !isExplored) {
       // Gentle floating effect in overview mode
       group.current.position.y = Math.sin(state.clock.elapsedTime) * 0.05;
+      group.current.rotation.y += 0.002;
     }
   });
 
   return (
-    <group ref={group} dispose={null}>
-      <primitive object={scene} scale={isExplored ? 1.2 : 1} />
+    <group ref={group} dispose={null} position={[0, -0.5, 0]}>
+      <primitive object={scene} scale={isExplored ? 1.4 : 1.2} />
     </group>
   );
 }
@@ -54,11 +55,12 @@ function HudLoader() {
 
 const Index = () => {
   const [isExplored, setIsExplored] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const modelUrl = "https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/mclaren-f1/model.gltf";
 
   return (
-    <div className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff]/30">
+    <div ref={containerRef} className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff]/30">
       {/* 1. TOP NAVIGATION */}
       <nav className="absolute top-0 w-full z-50 flex items-center justify-between px-12 py-8 bg-gradient-to-b from-black/80 to-transparent">
         <div className="flex items-center gap-2">
@@ -149,19 +151,20 @@ const Index = () => {
           shadows 
           camera={{ position: [0, 1, 8], fov: 35 }}
           dpr={[1, 2]}
+          // Using the container ref as the event source is much more stable than document.body
+          eventSource={containerRef as any}
         >
           <color attach="background" args={['#050506']} />
           <fog attach="fog" args={['#050506', 5, 20]} />
           
-          <ambientLight intensity={0.4} />
-          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={isExplored ? 2 : 0.8} color="#ffffff" castShadow />
-          <pointLight position={[-10, 5, -5]} intensity={1.5} color="#00f2ff" />
+          <ambientLight intensity={0.5} />
+          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={isExplored ? 2 : 1} color="#ffffff" castShadow />
+          <pointLight position={[-10, 5, -5]} intensity={2} color="#00f2ff" />
+          <Environment preset="night" />
 
           <Suspense fallback={<HudLoader />}>
-            <Stage environment="night" intensity={0.6} contactShadow={false} adjustCamera={false}>
-              <CarModel url={modelUrl} isExplored={isExplored} />
-            </Stage>
-
+            <CarModel url={modelUrl} isExplored={isExplored} />
+            
             <ContactShadows 
               position={[0, -0.6, 0]} 
               opacity={0.4} 
@@ -172,7 +175,6 @@ const Index = () => {
             />
           </Suspense>
 
-          {/* Using a single stable OrbitControls to prevent event system crashes */}
           <OrbitControls 
             makeDefault
             enableZoom={isExplored} 
