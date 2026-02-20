@@ -17,7 +17,7 @@ export default function Index() {
       <div className="absolute inset-0 z-0">
         <img 
           src={images.carBg} 
-          alt="Lustra Hypercar Background" 
+          alt="Kaaz Hypercar Background" 
           className="w-full h-full object-cover object-center md:object-[center_top]"
         />
         {/* Overlay gradient for text readability */}
@@ -35,7 +35,7 @@ export default function Index() {
             <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
               <path d={svgPaths.logo} />
             </svg>
-            <span className="text-xl font-bold tracking-[0.3em] font-['Playfair_Display',_serif] italic">LUSTRA</span>
+            <span className="text-xl font-bold tracking-widest font-['Orbitron',_sans-serif]">KAAZ</span>
           </div>
 
           {/* Desktop Nav */}
@@ -47,7 +47,7 @@ export default function Index() {
 
           {/* Contact Button (Desktop) */}
           <div className="hidden md:block">
-            <button className="px-6 py-2 border border-white/10 text-white text-xs tracking-widest uppercase hover:bg-white/5 transition-all rounded-sm backdrop-blur-sm font-['Rajdhani',_sans-serif]">
+            <button className="px-6 py-2 border border-cyan-500/30 text-cyan-400 text-xs tracking-widest uppercase hover:bg-cyan-900/20 transition-all rounded-sm backdrop-blur-sm font-['Orbitron',_sans-serif]">
               Contact
             </button>
           </div>
@@ -66,38 +66,38 @@ export default function Index() {
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="md:hidden absolute top-24 left-0 right-0 bg-black/95 backdrop-blur-md p-6 border-b border-gray-800 flex flex-col gap-6 z-50 font-['Rajdhani',_sans-serif]"
+            className="md:hidden absolute top-24 left-0 right-0 bg-black/95 backdrop-blur-md p-6 border-b border-gray-800 flex flex-col gap-6 z-50 font-['Orbitron',_sans-serif]"
           >
             <a href="#" className="text-gray-300 hover:text-white uppercase tracking-widest text-sm">The Machine</a>
             <a href="#" className="text-gray-300 hover:text-white uppercase tracking-widest text-sm">Specifications</a>
             <a href="#" className="text-gray-300 hover:text-white uppercase tracking-widest text-sm">Reserve</a>
-            <button className="px-6 py-3 border border-white/10 text-white text-xs tracking-widest uppercase w-full text-center">
+            <button className="px-6 py-3 border border-cyan-500/30 text-cyan-400 text-xs tracking-widest uppercase w-full text-center">
               Contact
             </button>
           </motion.div>
         )}
 
         {/* Hero Section */}
-        <main className="flex-1 flex flex-col justify-center mt-12 md:mt-0 max-w-3xl">
+        <main className="flex-1 flex flex-col justify-center mt-12 md:mt-0 max-w-2xl">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-tight tracking-tighter mb-6 font-['Playfair_Display',_serif] italic">
-              <span className="block text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-300 to-gray-500">LUSTRA</span>
-              <span className="block text-gray-400 font-medium text-2xl md:text-4xl lg:text-5xl mt-2 font-['Rajdhani',_sans-serif] not-italic tracking-normal">Engineered for the Elite.</span>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight tracking-wide mb-6 font-['Orbitron',_sans-serif]">
+              <span className="block text-gray-100">Redefining Velocity.</span>
+              <span className="block text-gray-400 font-medium text-3xl md:text-5xl lg:text-6xl mt-2">Engineered for the Elite.</span>
             </h1>
             
-            <p className="text-gray-400 text-sm md:text-lg max-w-md leading-relaxed mb-10 border-l-2 border-white/20 pl-4 font-light">
+            <p className="text-gray-400 text-sm md:text-lg max-w-md leading-relaxed mb-10 border-l-2 border-cyan-500/50 pl-4 font-light">
               A next-generation hypercar built for precision, dominance, and uncompromising innovation.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-              <KaazButton variant="explore" onClick={() => console.log('explore')} className="font-['Rajdhani',_sans-serif] border-white/30 text-white hover:bg-white hover:text-black">
+              <KaazButton variant="explore" onClick={() => console.log('explore')} className="font-['Orbitron',_sans-serif]">
                 Explore The Machine
               </KaazButton>
-              <KaazButton variant="reserve" onClick={() => console.log('reserve')} className="font-['Rajdhani',_sans-serif]">
+              <KaazButton variant="reserve" onClick={() => console.log('reserve')} className="font-['Orbitron',_sans-serif]">
                 Reserve Yours
               </KaazButton>
             </div>
@@ -113,14 +113,14 @@ export default function Index() {
         >
           {/* Stat 1 */}
           <div className="flex flex-col relative group">
-            <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="pl-4">
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl md:text-5xl font-['Playfair_Display',_serif] italic font-bold text-white">0-100</span>
+                <span className="text-3xl md:text-5xl font-['Orbitron',_sans-serif] font-light text-cyan-100">0-100</span>
                 <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">km/h</span>
               </div>
-              <div className="text-sm text-gray-400 tracking-widest uppercase font-medium">
-                In <span className="text-white font-['Playfair_Display',_serif] italic text-xl ml-1">2.1s</span>
+              <div className="text-sm text-cyan-400/80 tracking-widest uppercase font-medium">
+                In <span className="text-white font-['Orbitron',_sans-serif] text-xl ml-1">2.1s</span>
               </div>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function Index() {
             <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
             <div className="lg:pl-8 pl-4">
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl md:text-5xl font-['Playfair_Display',_serif] italic font-bold text-gray-200">810</span>
+                <span className="text-3xl md:text-5xl font-['Orbitron',_sans-serif] font-light text-gray-200">810</span>
                 <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">kg</span>
               </div>
               <div className="text-xs text-gray-500 tracking-widest uppercase font-medium">
@@ -144,7 +144,7 @@ export default function Index() {
             <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
             <div className="lg:pl-8 pl-4">
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl md:text-5xl font-['Playfair_Display',_serif] italic font-bold text-white">1,200+</span>
+                <span className="text-3xl md:text-5xl font-['Orbitron',_sans-serif] font-light text-cyan-100">1,200+</span>
                 <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">HP</span>
               </div>
               <div className="text-xs text-gray-500 tracking-widest uppercase font-medium">
@@ -158,7 +158,7 @@ export default function Index() {
             <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
             <div className="lg:pl-8 pl-4">
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-3xl md:text-5xl font-['Playfair_Display',_serif] italic font-bold text-gray-200">99</span>
+                <span className="text-3xl md:text-5xl font-['Orbitron',_sans-serif] font-light text-gray-200">99</span>
                 <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">Units</span>
               </div>
               <div className="text-xs text-gray-500 tracking-widest uppercase font-medium">
