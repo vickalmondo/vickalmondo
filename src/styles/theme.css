@@ -2,8 +2,8 @@
 
 :root {
   --font-size: 16px;
-  --font-heading: "Lustra", "Orbitron", sans-serif;
-  --font-sans: "Inter", "Rajdhani", sans-serif;
+  --font-heading: "Orbitron", sans-serif;
+  --font-sans: "Orbitron", sans-serif;
   
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
