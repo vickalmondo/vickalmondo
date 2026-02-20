@@ -18,12 +18,12 @@ function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
   const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
 
-  // Clone the scene to ensure it's unique to this component instance
-  const modelScene = useMemo(() => scene.clone(), [scene]);
+  // Memoize the scene to prevent unnecessary re-renders
+  const copiedScene = useMemo(() => scene.clone(), [scene]);
 
   useFrame((state) => {
     if (group.current && !isExplored) {
-      // Gentle floating and rotation in overview mode
+      // Gentle floating animation when in overview mode
       group.current.position.y = Math.sin(state.clock.elapsedTime) * 0.05;
       group.current.rotation.y += 0.002;
     }
@@ -31,7 +31,7 @@ function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
 
   return (
     <group ref={group} dispose={null}>
-      <primitive object={modelScene} scale={isExplored ? 1.2 : 1} />
+      <primitive object={copiedScene} scale={isExplored ? 1.2 : 1} />
     </group>
   );
 }
