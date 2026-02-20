@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stage, useGLTF, PresentationControls, ContactShadows, Html, useProgress } from '@react-three/drei';
+import { OrbitControls, Stage, useGLTF, ContactShadows, Html, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
@@ -23,6 +23,7 @@ function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
 
   useFrame((state) => {
     if (group.current && !isExplored) {
+      // Gentle floating animation when in overview mode
       group.current.position.y = Math.sin(state.clock.elapsedTime) * 0.05;
       group.current.rotation.y += 0.002;
     }
@@ -158,19 +159,9 @@ const Index = () => {
           <pointLight position={[-10, 5, -5]} intensity={1.5} color="#00f2ff" />
 
           <Suspense fallback={<HudLoader />}>
-            <PresentationControls
-              enabled={isExplored}
-              global
-              config={{ mass: 2, tension: 500 }}
-              snap={{ mass: 4, tension: 1500 }}
-              rotation={[0, -0.4, 0]}
-              polar={[-Math.PI / 4, Math.PI / 4]}
-              azimuth={[-Math.PI / 1.4, Math.PI / 1.4]}
-            >
-              <Stage environment="night" intensity={0.6} contactShadow={false} adjustCamera={false}>
-                <CarModel url={modelUrl} isExplored={isExplored} />
-              </Stage>
-            </PresentationControls>
+            <Stage environment="night" intensity={0.6} contactShadow={false} adjustCamera={false}>
+              <CarModel url={modelUrl} isExplored={isExplored} />
+            </Stage>
 
             <ContactShadows 
               position={[0, -0.6, 0]} 
@@ -182,14 +173,17 @@ const Index = () => {
             />
           </Suspense>
 
-          {/* OrbitControls is always mounted but enabled/disabled to prevent event system crashes */}
+          {/* Using a single, stable OrbitControls to prevent event system crashes */}
           <OrbitControls 
-            enabled={!isExplored}
-            enableZoom={false} 
+            makeDefault
+            enableZoom={isExplored} 
             enablePan={false}
+            enableDamping
+            dampingFactor={0.05}
             minPolarAngle={Math.PI / 2.5}
             maxPolarAngle={Math.PI / 2.1}
-            makeDefault
+            autoRotate={!isExplored}
+            autoRotateSpeed={0.5}
           />
         </Canvas>
       </div>
