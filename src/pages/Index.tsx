@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense, useRef } from 'react';
+import React, { useState, Suspense, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stage, useGLTF, PresentationControls, ContactShadows, Html, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
@@ -18,6 +18,9 @@ function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
   const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
 
+  // Memoize the scene to prevent unnecessary re-renders
+  const copiedScene = useMemo(() => scene.clone(), [scene]);
+
   useFrame((state) => {
     if (group.current && !isExplored) {
       group.current.position.y = Math.sin(state.clock.elapsedTime) * 0.05;
@@ -27,7 +30,7 @@ function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
 
   return (
     <group ref={group} dispose={null}>
-      <primitive object={scene} scale={isExplored ? 1.2 : 1} />
+      <primitive object={copiedScene} scale={isExplored ? 1.2 : 1} />
     </group>
   );
 }
@@ -146,14 +149,13 @@ const Index = () => {
 
       {/* 5. 3D INTERACTIVE CORE */}
       <div className="absolute inset-0 z-10 cursor-grab active:cursor-grabbing">
-        <Canvas shadows camera={{ position: [0, 1, 8], fov: 35 }}>
+        <Canvas shadows camera={{ position: [0, 1, 8], fov: 35 }} dpr={[1, 2]}>
           <color attach="background" args={['#050506']} />
           <fog attach="fog" args={['#050506', 5, 20]} />
           
-          <ambientLight intensity={0.2} />
+          <ambientLight intensity={0.4} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={isExplored ? 2 : 0.8} color="#ffffff" castShadow />
           <pointLight position={[-10, 5, -5]} intensity={1.5} color="#00f2ff" />
-          <rectAreaLight width={15} height={15} intensity={2} position={[0, 10, -10]} color="#fdd8b3" />
 
           <Suspense fallback={<HudLoader />}>
             <PresentationControls
@@ -165,7 +167,7 @@ const Index = () => {
               polar={[-Math.PI / 4, Math.PI / 4]}
               azimuth={[-Math.PI / 1.4, Math.PI / 1.4]}
             >
-              <Stage environment="night" intensity={0.6} contactShadow={false}>
+              <Stage environment="night" intensity={0.6} contactShadow={false} adjustCamera={false}>
                 <CarModel url={modelUrl} isExplored={isExplored} />
               </Stage>
             </PresentationControls>
@@ -180,12 +182,16 @@ const Index = () => {
             />
           </Suspense>
 
-          <OrbitControls 
-            enableZoom={false} 
-            enablePan={false}
-            minPolarAngle={Math.PI / 2.5}
-            maxPolarAngle={Math.PI / 2.1}
-          />
+          {/* Only use OrbitControls when PresentationControls is not handling the interaction */}
+          {!isExplored && (
+            <OrbitControls 
+              enableZoom={false} 
+              enablePan={false}
+              minPolarAngle={Math.PI / 2.5}
+              maxPolarAngle={Math.PI / 2.1}
+              makeDefault
+            />
+          )}
         </Canvas>
       </div>
 
