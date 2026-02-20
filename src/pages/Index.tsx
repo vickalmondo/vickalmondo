@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, Suspense, useRef, useMemo } from 'react';
+import React, { useState, Suspense, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stage, useGLTF, ContactShadows, Html, useProgress } from '@react-three/drei';
+import { OrbitControls, Stage, useGLTF, PresentationControls, ContactShadows, Html, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
@@ -18,12 +18,9 @@ function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
   const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
 
-  // Memoize the scene to prevent unnecessary re-renders
-  const copiedScene = useMemo(() => scene.clone(), [scene]);
-
   useFrame((state) => {
+    // Added safety check for group.current to prevent null pointer during unmount
     if (group.current && !isExplored) {
-      // Gentle floating animation when in overview mode
       group.current.position.y = Math.sin(state.clock.elapsedTime) * 0.05;
       group.current.rotation.y += 0.002;
     }
@@ -31,7 +28,7 @@ function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
 
   return (
     <group ref={group} dispose={null}>
-      <primitive object={copiedScene} scale={isExplored ? 1.2 : 1} />
+      <primitive object={scene} scale={isExplored ? 1.2 : 1} />
     </group>
   );
 }
@@ -58,12 +55,12 @@ function HudLoader() {
 
 const Index = () => {
   const [isExplored, setIsExplored] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   
-  // Using a high-quality McLaren F1 model as a placeholder for the KAAZ hypercar
   const modelUrl = "https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/mclaren-f1/model.gltf";
 
   return (
-    <div className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff]/30">
+    <div ref={containerRef} className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff]/30">
       {/* 1. TOP NAVIGATION */}
       <nav className="absolute top-0 w-full z-50 flex items-center justify-between px-12 py-8 bg-gradient-to-b from-black/80 to-transparent">
         <div className="flex items-center gap-2">
@@ -153,19 +150,36 @@ const Index = () => {
         <Canvas 
           shadows 
           camera={{ position: [0, 1, 8], fov: 35 }}
-          dpr={[1, 2]}
+          eventSource={containerRef as any}
+          eventPrefix="client"
+          // Crucial fix: ensure interactivity is properly handled by the fiber root
+          onCreated={(state) => {
+            if (containerRef.current) state.events.connect(containerRef.current);
+          }}
         >
           <color attach="background" args={['#050506']} />
           <fog attach="fog" args={['#050506', 5, 20]} />
           
-          <ambientLight intensity={0.4} />
+          <ambientLight intensity={0.2} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={isExplored ? 2 : 0.8} color="#ffffff" castShadow />
           <pointLight position={[-10, 5, -5]} intensity={1.5} color="#00f2ff" />
+          <rectAreaLight width={15} height={15} intensity={2} position={[0, 10, -10]} color="#fdd8b3" />
 
           <Suspense fallback={<HudLoader />}>
-            <Stage environment="night" intensity={0.6} contactShadow={false} adjustCamera={false}>
-              <CarModel url={modelUrl} isExplored={isExplored} />
-            </Stage>
+            <PresentationControls
+              enabled={isExplored}
+              global={false}
+              cursor={false} // Disable internal cursor handling to prevent event conflicts
+              config={{ mass: 2, tension: 500 }}
+              snap={{ mass: 4, tension: 1500 }}
+              rotation={[0, -0.4, 0]}
+              polar={[-Math.PI / 4, Math.PI / 4]}
+              azimuth={[-Math.PI / 1.4, Math.PI / 1.4]}
+            >
+              <Stage environment="night" intensity={0.6} contactShadow={false} adjustCamera={false}>
+                <CarModel url={modelUrl} isExplored={isExplored} />
+              </Stage>
+            </PresentationControls>
 
             <ContactShadows 
               position={[0, -0.6, 0]} 
@@ -177,17 +191,17 @@ const Index = () => {
             />
           </Suspense>
 
-          {/* Using a single stable OrbitControls to prevent event system crashes */}
+          {/* SOLVING THE ERROR: 
+            Instead of swapping components, we use a single persistent control set.
+            This prevents 'removeInteractivity' from calling on a null ref during transition.
+          */}
           <OrbitControls 
             makeDefault
-            enableZoom={isExplored} 
+            enabled={!isExplored}
+            enableZoom={false} 
             enablePan={false}
-            enableDamping
-            dampingFactor={0.05}
             minPolarAngle={Math.PI / 2.5}
             maxPolarAngle={Math.PI / 2.1}
-            autoRotate={!isExplored}
-            autoRotateSpeed={0.5}
           />
         </Canvas>
       </div>
