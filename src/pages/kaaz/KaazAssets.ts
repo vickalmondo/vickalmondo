@@ -1,5 +1,5 @@
 export const images = {
-  carBg: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2070&auto=format&fit=crop",
+  carBg: "/kaaz-bg.png",
 };
 
 export const svgPaths = {
