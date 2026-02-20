@@ -182,16 +182,15 @@ const Index = () => {
             />
           </Suspense>
 
-          {/* Only use OrbitControls when PresentationControls is not handling the interaction */}
-          {!isExplored && (
-            <OrbitControls 
-              enableZoom={false} 
-              enablePan={false}
-              minPolarAngle={Math.PI / 2.5}
-              maxPolarAngle={Math.PI / 2.1}
-              makeDefault
-            />
-          )}
+          {/* OrbitControls is always mounted but enabled/disabled to prevent event system crashes */}
+          <OrbitControls 
+            enabled={!isExplored}
+            enableZoom={false} 
+            enablePan={false}
+            minPolarAngle={Math.PI / 2.5}
+            maxPolarAngle={Math.PI / 2.1}
+            makeDefault
+          />
         </Canvas>
       </div>
 
