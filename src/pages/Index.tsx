@@ -1,206 +1,177 @@
 "use client";
 
-import React, { useState, Suspense, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, ContactShadows, Html, useProgress, Environment } from '@react-three/drei';
-import * as THREE from 'three';
+import { motion } from "motion/react";
+import { Link } from "react-router-dom";
+import { images, svgPaths } from "./kaaz/KaazAssets";
+import { KaazButton } from "./kaaz/KaazButton";
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 
-/**
- * KAAZ DESIGN SYSTEM TOKENS
- * Primary: #00f2ff (Electric Cyan)
- * Secondary: #ff8a00 (Ignition Orange)
- * Background: #050506 (Void Black)
- */
-
-// 3D Model Component with Hover Animation
-function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
-  const { scene } = useGLTF(url);
-  const group = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (group.current && !isExplored) {
-      // Gentle floating effect in overview mode
-      group.current.position.y = Math.sin(state.clock.elapsedTime) * 0.05;
-      group.current.rotation.y += 0.002;
-    }
-  });
+export default function Index() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <group ref={group} dispose={null} position={[0, -0.5, 0]}>
-      <primitive object={scene} scale={isExplored ? 1.4 : 1.2} />
-    </group>
-  );
-}
-
-// Custom HUD Loader
-function HudLoader() {
-  const { progress } = useProgress();
-  return (
-    <Html center>
-      <div className="flex flex-col items-center justify-center w-64">
-        <div className="w-full bg-white/5 h-[1px] mb-2 overflow-hidden">
-          <div 
-            className="h-full bg-[#00f2ff] shadow-[0_0_10px_#00f2ff] transition-all duration-300" 
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-        <p className="text-[#00f2ff] font-mono text-[8px] tracking-[0.5em] uppercase animate-pulse">
-          Syncing_Telemetry: {Math.round(progress)}%
-        </p>
+    <div className="min-h-screen bg-[#031015] text-white overflow-x-hidden font-['Rajdhani',_sans-serif] relative">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src={images.carBg} 
+          alt="Kaaz Hypercar Background" 
+          className="w-full h-full object-cover object-center md:object-[center_top]"
+        />
+        {/* Overlay gradient for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40" />
       </div>
-    </Html>
-  );
-}
 
-const Index = () => {
-  const [isExplored, setIsExplored] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  const modelUrl = "https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/mclaren-f1/model.gltf";
-
-  return (
-    <div ref={containerRef} className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff]/30">
-      {/* 1. TOP NAVIGATION */}
-      <nav className="absolute top-0 w-full z-50 flex items-center justify-between px-12 py-8 bg-gradient-to-b from-black/80 to-transparent">
-        <div className="flex items-center gap-2">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <span className="text-xl font-black tracking-tighter uppercase">KAAZ</span>
-        </div>
+      {/* Content Wrapper */}
+      <div className="relative z-10 container mx-auto px-6 md:px-12 flex flex-col min-h-screen justify-between">
         
-        <div className="hidden md:flex items-center gap-12 text-[10px] font-bold tracking-[0.3em] uppercase opacity-60">
-          <a href="#" className="hover:text-white transition-colors">The Machine</a>
-          <a href="#" className="hover:text-white transition-colors">Specifications</a>
-          <a href="#" className="hover:text-white transition-colors">Reserve</a>
-        </div>
+        {/* Header */}
+        <header className="flex items-center justify-between py-8">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <path d={svgPaths.logo} />
+            </svg>
+            <span className="text-xl font-bold tracking-widest font-['Orbitron',_sans-serif]">KAAZ</span>
+          </div>
 
-        <button className="px-8 py-2 border border-[#00f2ff]/30 rounded-sm text-[10px] font-bold tracking-widest uppercase hover:bg-[#00f2ff] hover:text-black transition-all shadow-[inset_0_0_15px_rgba(0,242,255,0.1)]">
-          Contact
-        </button>
-      </nav>
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-12 text-sm tracking-widest text-gray-400 font-medium">
+            <a href="#" className="hover:text-white transition-colors uppercase">The Machine</a>
+            <a href="#" className="hover:text-white transition-colors uppercase">Specifications</a>
+            <a href="#" className="hover:text-white transition-colors uppercase">Reserve</a>
+          </nav>
 
-      {/* 2. MAIN CONTENT OVERLAY */}
-      <div className={`absolute inset-0 z-20 flex flex-col justify-center px-12 transition-all duration-1000 ${isExplored ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
-        <div className="max-w-3xl space-y-6">
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none italic uppercase">
-            Redefining Velocity.<br />
-            <span className="text-white/20">Engineered for the Elite.</span>
-          </h1>
-          <p className="text-white/40 text-lg max-w-md font-medium leading-relaxed">
-            A next-generation hypercar built for precision, dominance, and uncompromising innovation.
-          </p>
-          
-          <div className="flex flex-wrap gap-6 pt-8">
-            <button 
-              onClick={() => setIsExplored(true)}
-              className="relative group overflow-hidden px-10 py-4 bg-transparent border border-[#00f2ff]/50 text-[#00f2ff] font-bold uppercase tracking-[0.2em] text-xs transition-all hover:shadow-[0_0_30px_rgba(0,242,255,0.3)]"
-            >
-              <div className="absolute inset-0 bg-[#00f2ff]/10 group-hover:bg-[#00f2ff]/20 transition-all"></div>
-              <span className="relative z-10">Explore the Machine</span>
-            </button>
-
-            <button className="relative group overflow-hidden px-10 py-4 bg-transparent border border-[#ff8a00]/50 text-[#ff8a00] font-bold uppercase tracking-[0.2em] text-xs transition-all hover:shadow-[0_0_30px_rgba(255,138,0,0.3)]">
-              <div className="absolute inset-0 bg-[#ff8a00]/10 group-hover:bg-[#ff8a00]/20 transition-all"></div>
-              <span className="relative z-10">Reserve Yours</span>
+          {/* Contact Button (Desktop) */}
+          <div className="hidden md:block">
+            <button className="px-6 py-2 border border-cyan-500/30 text-cyan-400 text-xs tracking-widest uppercase hover:bg-cyan-900/20 transition-all rounded-sm backdrop-blur-sm font-['Orbitron',_sans-serif]">
+              Contact
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* 3. PERFORMANCE STATS (FOOTER) */}
-      <div className={`absolute bottom-0 w-full z-30 px-12 py-16 grid grid-cols-2 md:grid-cols-4 gap-8 transition-transform duration-1000 ${isExplored ? 'translate-y-full' : 'translate-y-0'}`}>
-        {[
-          { label: "0-100 KM/H", val: "2.1s", sub: "Launch Control" },
-          { label: "810 KG", val: "Weight", sub: "Ultra-Light Chassis", highlight: true },
-          { label: "1,200+ HP", val: "Output", sub: "Hybrid Powertrain" },
-          { label: "99 UNITS", val: "Worldwide", sub: "Limited Production" }
-        ].map((stat, i) => (
-          <div key={i} className="group cursor-crosshair">
-            <div className={`h-[1px] w-full mb-4 transition-all duration-700 ${stat.highlight ? 'bg-[#00f2ff] shadow-[0_0_10px_#00f2ff]' : 'bg-white/10 group-hover:bg-white/30'}`}></div>
-            <p className="text-[10px] font-black tracking-[0.3em] uppercase text-white/40 mb-1">{stat.label}</p>
-            <h4 className="text-2xl font-black italic">{stat.val}</h4>
-            <p className="text-[10px] uppercase tracking-widest text-white/20 mt-1">{stat.sub}</p>
-          </div>
-        ))}
-      </div>
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden text-white"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X /> : <Menu />}
+          </button>
+        </header>
 
-      {/* 4. EXPLORATION HUD (TOP LEFT) */}
-      <div className={`absolute top-12 left-12 z-40 transition-all duration-1000 delay-500 ${isExplored ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10 pointer-events-none'}`}>
-        <div className="flex items-center gap-4 mb-4">
-          <div className="h-[2px] w-12 bg-[#00f2ff] shadow-[0_0_10px_#00f2ff]"></div>
-          <span className="text-[#00f2ff] font-bold tracking-[0.4em] text-[10px] uppercase">Telemetry Active</span>
-        </div>
-        <h2 className="text-white text-5xl font-black italic tracking-tighter">870<span className="text-[#00f2ff] not-italic text-2xl ml-2">KG</span></h2>
-        <p className="text-white/30 text-[10px] uppercase tracking-[0.3em] mt-2 font-bold">Dynamic Weight Distribution</p>
-        
-        <button 
-          onClick={() => setIsExplored(false)}
-          className="mt-8 text-white/40 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 pointer-events-auto"
-        >
-          <span>←</span> Back to Overview
-        </button>
-      </div>
+        {/* Mobile Nav Overlay */}
+        {isMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:hidden absolute top-24 left-0 right-0 bg-black/95 backdrop-blur-md p-6 border-b border-gray-800 flex flex-col gap-6 z-50 font-['Orbitron',_sans-serif]"
+          >
+            <a href="#" className="text-gray-300 hover:text-white uppercase tracking-widest text-sm">The Machine</a>
+            <a href="#" className="text-gray-300 hover:text-white uppercase tracking-widest text-sm">Specifications</a>
+            <a href="#" className="text-gray-300 hover:text-white uppercase tracking-widest text-sm">Reserve</a>
+            <button className="px-6 py-3 border border-cyan-500/30 text-cyan-400 text-xs tracking-widest uppercase w-full text-center">
+              Contact
+            </button>
+          </motion.div>
+        )}
 
-      {/* 5. 3D INTERACTIVE CORE */}
-      <div className="absolute inset-0 z-10 cursor-grab active:cursor-grabbing">
-        <Canvas 
-          shadows 
-          camera={{ position: [0, 1, 8], fov: 35 }}
-          dpr={[1, 2]}
-          // Using the container ref as the event source is much more stable than document.body
-          eventSource={containerRef as any}
-        >
-          <color attach="background" args={['#050506']} />
-          <fog attach="fog" args={['#050506', 5, 20]} />
-          
-          <ambientLight intensity={0.5} />
-          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={isExplored ? 2 : 1} color="#ffffff" castShadow />
-          <pointLight position={[-10, 5, -5]} intensity={2} color="#00f2ff" />
-          <Environment preset="night" />
-
-          <Suspense fallback={<HudLoader />}>
-            <CarModel url={modelUrl} isExplored={isExplored} />
+        {/* Hero Section */}
+        <main className="flex-1 flex flex-col justify-center mt-12 md:mt-0 max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight tracking-wide mb-6 font-['Orbitron',_sans-serif]">
+              <span className="block text-gray-100">Redefining Velocity.</span>
+              <span className="block text-gray-400 font-medium text-3xl md:text-5xl lg:text-6xl mt-2">Engineered for the Elite.</span>
+            </h1>
             
-            <ContactShadows 
-              position={[0, -0.6, 0]} 
-              opacity={0.4} 
-              scale={20} 
-              blur={2.4} 
-              far={1.5} 
-              color="#000000" 
-            />
-          </Suspense>
+            <p className="text-gray-400 text-sm md:text-lg max-w-md leading-relaxed mb-10 border-l-2 border-cyan-500/50 pl-4 font-light">
+              A next-generation hypercar built for precision, dominance, and uncompromising innovation.
+            </p>
 
-          <OrbitControls 
-            makeDefault
-            enableZoom={isExplored} 
-            enablePan={false}
-            enableDamping
-            dampingFactor={0.05}
-            minPolarAngle={Math.PI / 2.5}
-            maxPolarAngle={Math.PI / 2.1}
-            autoRotate={!isExplored}
-            autoRotateSpeed={0.5}
-          />
-        </Canvas>
-      </div>
+            <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+              <KaazButton variant="explore" onClick={() => console.log('explore')} className="font-['Orbitron',_sans-serif]">
+                Explore The Machine
+              </KaazButton>
+              <KaazButton variant="reserve" onClick={() => console.log('reserve')} className="font-['Orbitron',_sans-serif]">
+                Reserve Yours
+              </KaazButton>
+            </div>
+          </motion.div>
+        </main>
 
-      {/* 6. AESTHETIC SCANLINES & VIGNETTE */}
-      <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-60"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40"></div>
-        <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_3px,4px_100%]"></div>
-      </div>
+        {/* Stats Section */}
+        <motion.div 
+          className="grid grid-cols-2 lg:grid-cols-4 gap-8 py-12 border-t border-white/10 mt-12 backdrop-blur-sm bg-black/20 rounded-t-xl px-4"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+        >
+          {/* Stat 1 */}
+          <div className="flex flex-col relative group">
+            <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="pl-4">
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-3xl md:text-5xl font-['Orbitron',_sans-serif] font-light text-cyan-100">0-100</span>
+                <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">km/h</span>
+              </div>
+              <div className="text-sm text-cyan-400/80 tracking-widest uppercase font-medium">
+                In <span className="text-white font-['Orbitron',_sans-serif] text-xl ml-1">2.1s</span>
+              </div>
+            </div>
+          </div>
 
-      <div className="absolute bottom-4 left-0 right-0 z-50 pointer-events-none">
-        <MadeWithDyad />
+          {/* Stat 2 */}
+          <div className="flex flex-col relative group">
+            <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
+            <div className="lg:pl-8 pl-4">
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-3xl md:text-5xl font-['Orbitron',_sans-serif] font-light text-gray-200">810</span>
+                <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">kg</span>
+              </div>
+              <div className="text-xs text-gray-500 tracking-widest uppercase font-medium">
+                Ultra-light Chassis
+              </div>
+            </div>
+          </div>
+
+          {/* Stat 3 */}
+          <div className="flex flex-col relative group">
+            <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
+            <div className="lg:pl-8 pl-4">
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-3xl md:text-5xl font-['Orbitron',_sans-serif] font-light text-cyan-100">1,200+</span>
+                <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">HP</span>
+              </div>
+              <div className="text-xs text-gray-500 tracking-widest uppercase font-medium">
+                Hybrid Powertrain
+              </div>
+            </div>
+          </div>
+
+          {/* Stat 4 */}
+          <div className="flex flex-col relative group">
+            <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[1px] bg-white/20" />
+            <div className="lg:pl-8 pl-4">
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-3xl md:text-5xl font-['Orbitron',_sans-serif] font-light text-gray-200">99</span>
+                <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">Units</span>
+              </div>
+              <div className="text-xs text-gray-500 tracking-widest uppercase font-medium">
+                Worldwide
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="py-4">
+          <MadeWithDyad />
+        </div>
       </div>
     </div>
   );
 }
-
-export default Index;
