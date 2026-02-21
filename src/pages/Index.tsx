@@ -68,7 +68,7 @@ export default function Index() {
           </motion.div>
         )}
 
-        <main className="flex-1 flex flex-col justify-center mt-12 md:mt-0 max-w-2xl min-h-[70vh]">
+        <main className="flex-1 flex flex-col justify-center mt-12 md:mt-0 max-w-4xl min-h-[70vh]">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -79,16 +79,16 @@ export default function Index() {
               <span className="block text-gray-400 font-medium text-3xl md:text-5xl lg:text-6xl mt-2">Engineered for the Elite.</span>
             </h1>
             
-            <p className="text-gray-400 text-sm md:text-lg max-w-md leading-relaxed mb-10 border-l-2 border-cyan-500/50 pl-4 font-light">
+            <p className="text-gray-400 text-sm md:text-lg max-w-md leading-relaxed mb-16 border-l-2 border-cyan-500/50 pl-4 font-light">
               A next-generation hypercar built for precision, dominance, and uncompromising innovation.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-              <KaazButton variant="explore" onClick={() => console.log('explore')} className="font-heading">
-                Explore The Machine
+            <div className="flex flex-col gap-12 items-start">
+              <KaazButton variant="explore" onClick={() => console.log('explore')}>
+                Explore
               </KaazButton>
-              <KaazButton variant="reserve" onClick={() => console.log('reserve')} className="font-heading">
-                Reserve Yours
+              <KaazButton variant="reserve" onClick={() => console.log('reserve')}>
+                Reserve
               </KaazButton>
             </div>
           </motion.div>
