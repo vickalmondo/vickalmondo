@@ -18,28 +18,34 @@ import { useNavigate } from 'react-router-dom';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * 3D INTEGRATION
+ * 3D INTEGRATION: LOCAL PUBLIC ASSET (.glb)
  */
 
 // --- 3D Components ---
 
-function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
+function LamborghiniModel({ url, isExplored }: { url: string; isExplored: boolean }) {
+  // Loading the GLB from your public folder path
   const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
 
+  // Handle material cleanup and shadow casting for the imported scene
   useEffect(() => {
-    scene.traverse((node) => {
-      if ((node as THREE.Mesh).isMesh) {
-        node.castShadow = true;
-        node.receiveShadow = true;
-        const mesh = node as THREE.Mesh;
-        if (mesh.material) {
-          (mesh.material as THREE.MeshStandardMaterial).envMapIntensity = 1.5;
+    if (scene) {
+      scene.traverse((node) => {
+        if ((node as THREE.Mesh).isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+          const mesh = node as THREE.Mesh;
+          // Optional: Increase material shine for the 'Carbon' look
+          if (mesh.material) {
+            (mesh.material as THREE.MeshStandardMaterial).envMapIntensity = 1.5;
+          }
         }
-      }
-    });
+      });
+    }
   }, [scene]);
 
+  // Subtle idle animation when in 'Hero' mode
   useFrame((state) => {
     if (group.current && !isExplored) {
       group.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
@@ -79,17 +85,17 @@ function TechLoader() {
   );
 }
 
+// --- Main Application ---
+
 export default function Showcase() {
   const [isExplored, setIsExplored] = useState(false);
-  const [eventSource, setEventSource] = useState<HTMLElement | null>(null);
   const navigate = useNavigate();
   
-  // Using the correct working URL for the Ferrari model from Three.js dev branch
-  const modelPath = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb"; 
+  // Pointing directly to your public folder asset
+  const modelPath = "./scene.glb"; 
 
   return (
     <div 
-      ref={setEventSource}
       className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff] selection:text-black"
     >
       
@@ -142,64 +148,59 @@ export default function Showcase() {
 
       {/* 3. CORE: 3D ENGINE */}
       <div className="absolute inset-0 z-10">
-        {eventSource && (
-          <Canvas 
-            shadows 
-            dpr={[1, 2]}
-            eventSource={eventSource}
-            eventPrefix="client"
-          >
-            <color attach="background" args={['#050506']} />
-            <fog attach="fog" args={['#050506', 10, 25]} />
-            
-            <Suspense fallback={<TechLoader />}>
-              <PresentationControls
-                enabled={isExplored}
-                global={false} 
-                cursor={false}
-                config={{ mass: 2, tension: 400 }}
-                snap={{ mass: 4, tension: 1000 }}
-                rotation={[0, -0.4, 0]}
-                polar={[-Math.PI / 6, Math.PI / 6]}
-                azimuth={[-Math.PI / 1.5, Math.PI / 1.5]}
+        <Canvas 
+          shadows 
+          dpr={[1, 2]}
+          camera={{ position: [0, 1.5, 12], fov: 35 }}
+        >
+          <color attach="background" args={['#050506']} />
+          <fog attach="fog" args={['#050506', 10, 25]} />
+          
+          <Suspense fallback={<TechLoader />}>
+            <PresentationControls
+              enabled={isExplored}
+              global={false} 
+              cursor={false}
+              config={{ mass: 2, tension: 400 }}
+              snap={{ mass: 4, tension: 1000 }}
+              rotation={[0, -0.4, 0]}
+              polar={[-Math.PI / 6, Math.PI / 6]}
+              azimuth={[-Math.PI / 1.5, Math.PI / 1.5]}
+            >
+              <Stage 
+                environment="city" 
+                intensity={0.6} 
+                contactShadow={false}
+                shadows="contact"
+                adjustCamera={false}
               >
-                <Stage 
-                  environment="city" 
-                  intensity={0.6} 
-                  contactShadow={false}
-                  shadows="contact"
-                  adjustCamera={false}
-                >
-                  <CarModel url={modelPath} isExplored={isExplored} />
-                </Stage>
-              </PresentationControls>
+                <LamborghiniModel url={modelPath} isExplored={isExplored} />
+              </Stage>
+            </PresentationControls>
 
-              <ContactShadows 
-                position={[0, -1.2, 0]} 
-                opacity={0.8} 
-                scale={20} 
-                blur={2} 
-                far={2} 
-                color="#000000"
-              />
-            </Suspense>
-
-            <PerspectiveCamera makeDefault position={[0, 1.5, 12]} fov={35} />
-
-            <OrbitControls 
-              makeDefault
-              enabled={!isExplored}
-              enableZoom={false} 
-              enablePan={false}
-              minPolarAngle={Math.PI / 2.4}
-              maxPolarAngle={Math.PI / 2.1}
-              autoRotate={!isExplored}
-              autoRotateSpeed={0.4}
+            <ContactShadows 
+              position={[0, -1.2, 0]} 
+              opacity={0.8} 
+              scale={20} 
+              blur={2} 
+              far={2} 
+              color="#000000"
             />
-            
-            <Environment preset="night" />
-          </Canvas>
-        )}
+          </Suspense>
+
+          <OrbitControls 
+            makeDefault
+            enabled={!isExplored}
+            enableZoom={false} 
+            enablePan={false}
+            minPolarAngle={Math.PI / 2.4}
+            maxPolarAngle={Math.PI / 2.1}
+            autoRotate={!isExplored}
+            autoRotateSpeed={0.4}
+          />
+          
+          <Environment preset="night" />
+        </Canvas>
       </div>
 
       {/* 4. INTERFACE: EXPLORATION HUD */}
@@ -249,5 +250,5 @@ export default function Showcase() {
   );
 }
 
-// Pre-load the asset
-useGLTF.preload("https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb");
+// Pre-load the local asset
+useGLTF.preload("./scene.glb");
