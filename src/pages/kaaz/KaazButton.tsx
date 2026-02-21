@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { cn } from "@/lib/utils";
 
 interface KaazButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -47,9 +47,16 @@ export const KaazButton = ({ variant = 'explore', children, className, ...props 
       }}
       {...props}
     >
+      {/* Default Border Layer */}
+      <div className={cn(
+        "absolute inset-0 border-2 transition-all duration-300 z-20 pointer-events-none",
+        isExplore ? "border-[#7CD2DE]" : "border-[#E9B681]",
+        isActive ? "opacity-100" : "opacity-60"
+      )} />
+
       {/* Sparkle Backdrop */}
       <div className={cn(
-        "absolute inset-[1px] bg-[#111] transition-colors duration-300 z-0",
+        "absolute inset-[2px] bg-[#111] transition-colors duration-300 z-0",
         isActive ? (isExplore ? "bg-cyan-950/40" : "bg-orange-950/40") : "bg-[#111]"
       )} />
 
