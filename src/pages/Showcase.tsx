@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * Updated for extreme zoom capabilities
+ * Updated for extreme zoom and better framing
  */
 
 // --- 3D Components ---
@@ -154,7 +154,7 @@ export default function Showcase() {
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [0, 5, 60], fov: 45 }} // Significantly further initial position
+          camera={{ position: [0, 15, 150], fov: 45 }} // Moved camera much further back and higher
           dpr={[1, 2]}
         >
           <color attach="background" args={['#050506']} />
@@ -193,8 +193,8 @@ export default function Showcase() {
             makeDefault
             enableZoom={true} 
             enablePan={true}
-            minDistance={2} 
-            maxDistance={150} // Massive zoom out capability
+            minDistance={5} 
+            maxDistance={500} // Massive zoom out capability
             autoRotate={!isExplored}
             autoRotateSpeed={0.8} 
             target={[0, 0, 0]} 
