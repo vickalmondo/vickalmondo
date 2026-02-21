@@ -6,7 +6,6 @@ import { KaazButton } from "./kaaz/KaazButton";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MadeWithDyad } from "@/components/made-with-dyad";
 import Specifications from "@/components/Specifications";
 import Logo from "@/components/Logo";
 
@@ -153,10 +152,6 @@ export default function Index() {
       </div>
 
       <Specifications />
-
-      <div className="py-8 bg-black">
-        <MadeWithDyad />
-      </div>
     </div>
   );
 }
