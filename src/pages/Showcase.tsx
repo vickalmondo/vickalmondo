@@ -145,7 +145,8 @@ export default function Showcase() {
         <Canvas 
           shadows 
           dpr={[1, 2]}
-          eventSource={typeof document !== 'undefined' ? (document.getElementById('root') || undefined) : undefined}
+          // Using document.body as a stable event source to prevent null pointer errors during cleanup
+          eventSource={typeof document !== 'undefined' ? document.body : undefined}
           eventPrefix="client"
         >
           <color attach="background" args={['#050506']} />
