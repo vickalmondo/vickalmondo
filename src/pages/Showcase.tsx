@@ -6,7 +6,6 @@ import {
   OrbitControls, 
   Stage, 
   useGLTF, 
-  PresentationControls,
   ContactShadows, 
   Html, 
   useProgress,
@@ -19,7 +18,7 @@ import { Box, Maximize, Move, Square } from 'lucide-react';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * Unlocked camera for wide-range viewing
+ * FULLY UNRESTRICTED CAMERA
  */
 
 // --- 3D Components ---
@@ -57,7 +56,7 @@ function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
     <group ref={group} dispose={null}>
       <primitive 
         object={cleanScene} 
-        scale={1.2} 
+        scale={1.5} 
         position={[0, -0.2, 0]} 
       />
     </group>
@@ -156,7 +155,7 @@ export default function Showcase() {
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [40, 20, 40], fov: 45, far: 2000 }}
+          camera={{ position: [150, 100, 150], fov: 45, far: 10000 }}
           dpr={[1, 2]}
         >
           <color attach="background" args={['#050506']} />
@@ -170,21 +169,14 @@ export default function Showcase() {
               adjustCamera={false} 
               environment="city"
             >
-              <PresentationControls
-                enabled={isExplored}
-                global={false}
-                rotation={[0, -0.4, 0]}
-                polar={[-Math.PI / 4, Math.PI / 4]}
-                azimuth={[-Math.PI / 2, Math.PI / 2]}
-              >
-                <LamborghiniModel url={modelPath} isExplored={isExplored} />
-              </PresentationControls>
+              {/* Removed PresentationControls to prevent elastic snapping conflicts */}
+              <LamborghiniModel url={modelPath} isExplored={isExplored} />
             </Stage>
 
             <ContactShadows 
               position={[0, -1.2, 0]} 
               opacity={0.4} 
-              scale={40} 
+              scale={100} 
               blur={2} 
               color="#000000"
             />
@@ -194,9 +186,9 @@ export default function Showcase() {
             makeDefault
             enableZoom={true} 
             enablePan={true}
-            minDistance={2} 
-            maxDistance={1000}
-            autoRotate={true}
+            minDistance={1} 
+            maxDistance={5000}
+            autoRotate={!isExplored}
             autoRotateSpeed={0.5}
             target={[0, 0, 0]} 
           />

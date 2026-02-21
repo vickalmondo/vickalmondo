@@ -10,12 +10,12 @@ interface CameraHandlerProps {
   view: ViewType;
 }
 
-// Significantly increased distances to allow for a "far away" perspective
+// Set preset positions much further back to start with a wide view
 const VIEW_CONFIGS: Record<ViewType, { position: [number, number, number]; target: [number, number, number] }> = {
-  front: { position: [0, 2, 40], target: [0, 0, 0] },
-  top: { position: [0, 60, 0], target: [0, 0, 0] },
-  side: { position: [50, 2, 0], target: [0, 0, 0] },
-  perspective: { position: [40, 20, 40], target: [0, 0, 0] },
+  front: { position: [0, 5, 150], target: [0, 0, 0] },
+  top: { position: [0, 300, 0], target: [0, 0, 0] },
+  side: { position: [200, 5, 0], target: [0, 0, 0] },
+  perspective: { position: [150, 100, 150], target: [0, 0, 0] },
 };
 
 const CameraHandler = ({ view }: CameraHandlerProps) => {
@@ -38,18 +38,20 @@ const CameraHandler = ({ view }: CameraHandlerProps) => {
   useFrame(() => {
     if (!isAnimating.current) return;
 
-    camera.position.lerp(targetPos.current, 0.05);
+    // Use a slightly faster lerp to reach the target quickly
+    camera.position.lerp(targetPos.current, 0.1);
     
     if (controls) {
       // @ts-ignore
-      controls.target.lerp(targetLookAt.current, 0.05);
+      controls.target.lerp(targetLookAt.current, 0.1);
       // @ts-ignore
       controls.update();
     } else {
       camera.lookAt(targetLookAt.current);
     }
 
-    if (camera.position.distanceTo(targetPos.current) < 0.1) {
+    // Stop animating as soon as we are close to prevent "fighting" with user input
+    if (camera.position.distanceTo(targetPos.current) < 0.5) {
       isAnimating.current = false;
     }
   });
