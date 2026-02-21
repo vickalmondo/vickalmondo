@@ -1,7 +1,7 @@
 "use client";
 
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 
 export type ViewType = 'front' | 'top' | 'side' | 'perspective';
@@ -11,35 +11,48 @@ interface CameraHandlerProps {
 }
 
 const VIEW_CONFIGS: Record<ViewType, { position: [number, number, number]; target: [number, number, number] }> = {
-  front: { position: [0, 2, 60], target: [0, 0, 0] },
-  top: { position: [0, 100, 0], target: [0, 0, 0] },
-  side: { position: [80, 2, 0], target: [0, 0, 0] },
-  perspective: { position: [70, 40, 70], target: [0, 0, 0] },
+  front: { position: [0, 5, 100], target: [0, 0, 0] },
+  top: { position: [0, 150, 0], target: [0, 0, 0] },
+  side: { position: [120, 5, 0], target: [0, 0, 0] },
+  perspective: { position: [100, 50, 100], target: [0, 0, 0] },
 };
 
 const CameraHandler = ({ view }: CameraHandlerProps) => {
   const { camera, controls } = useThree();
-  const [targetPos] = useState(() => new THREE.Vector3());
-  const [targetLookAt] = useState(() => new THREE.Vector3());
+  const targetPos = useRef(new THREE.Vector3());
+  const targetLookAt = useRef(new THREE.Vector3());
+  const isAnimating = useRef(false);
+  const lastView = useRef<ViewType | null>(null);
 
   useEffect(() => {
-    const config = VIEW_CONFIGS[view];
-    targetPos.set(...config.position);
-    targetLookAt.set(...config.target);
-  }, [view, targetPos, targetLookAt]);
+    // Only trigger animation if the view actually changed
+    if (lastView.current !== view) {
+      const config = VIEW_CONFIGS[view];
+      targetPos.current.set(...config.position);
+      targetLookAt.current.set(...config.target);
+      isAnimating.current = true;
+      lastView.current = view;
+    }
+  }, [view]);
 
-  useFrame((state) => {
+  useFrame(() => {
+    if (!isAnimating.current) return;
+
     // Smoothly interpolate camera position
-    camera.position.lerp(targetPos, 0.05);
+    camera.position.lerp(targetPos.current, 0.05);
     
-    // If controls exist (OrbitControls), update their target smoothly too
     if (controls) {
       // @ts-ignore - OrbitControls has a target property
-      controls.target.lerp(targetLookAt, 0.05);
+      controls.target.lerp(targetLookAt.current, 0.05);
       // @ts-ignore
       controls.update();
     } else {
-      camera.lookAt(targetLookAt);
+      camera.lookAt(targetLookAt.current);
+    }
+
+    // Stop animating once we are close enough to the target
+    if (camera.position.distanceTo(targetPos.current) < 0.1) {
+      isAnimating.current = false;
     }
   });
 

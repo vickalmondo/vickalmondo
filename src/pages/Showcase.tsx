@@ -190,7 +190,7 @@ export default function Showcase() {
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [0, 40, 150], fov: 45, far: 2000 }}
+          camera={{ position: [100, 50, 100], fov: 45, far: 2000 }}
           dpr={[1, 2]}
         >
           <color attach="background" args={['#050506']} />
@@ -224,7 +224,7 @@ export default function Showcase() {
             enableZoom={true} 
             enablePan={true}
             minDistance={10} 
-            maxDistance={500}
+            maxDistance={1000}
             autoRotate={true}
             autoRotateSpeed={0.5} 
           />
