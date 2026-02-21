@@ -81,7 +81,7 @@ function TechLoader() {
 
 export default function Showcase() {
   const [isExplored, setIsExplored] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [eventSource, setEventSource] = useState<HTMLElement | null>(null);
   const navigate = useNavigate();
   
   // Using the correct working URL for the Ferrari model from Three.js dev branch
@@ -89,7 +89,7 @@ export default function Showcase() {
 
   return (
     <div 
-      ref={containerRef} 
+      ref={setEventSource}
       className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff] selection:text-black"
     >
       
@@ -142,62 +142,64 @@ export default function Showcase() {
 
       {/* 3. CORE: 3D ENGINE */}
       <div className="absolute inset-0 z-10">
-        <Canvas 
-          shadows 
-          dpr={[1, 2]}
-          // Using the container ref as the event source is the most stable way to handle R3F events
-          eventSource={containerRef}
-        >
-          <color attach="background" args={['#050506']} />
-          <fog attach="fog" args={['#050506', 10, 25]} />
-          
-          <Suspense fallback={<TechLoader />}>
-            <PresentationControls
-              enabled={isExplored}
-              global={false} 
-              cursor={false}
-              config={{ mass: 2, tension: 400 }}
-              snap={{ mass: 4, tension: 1000 }}
-              rotation={[0, -0.4, 0]}
-              polar={[-Math.PI / 6, Math.PI / 6]}
-              azimuth={[-Math.PI / 1.5, Math.PI / 1.5]}
-            >
-              <Stage 
-                environment="city" 
-                intensity={0.6} 
-                contactShadow={false}
-                shadows="contact"
-                adjustCamera={false}
+        {eventSource && (
+          <Canvas 
+            shadows 
+            dpr={[1, 2]}
+            eventSource={eventSource}
+            eventPrefix="client"
+          >
+            <color attach="background" args={['#050506']} />
+            <fog attach="fog" args={['#050506', 10, 25]} />
+            
+            <Suspense fallback={<TechLoader />}>
+              <PresentationControls
+                enabled={isExplored}
+                global={false} 
+                cursor={false}
+                config={{ mass: 2, tension: 400 }}
+                snap={{ mass: 4, tension: 1000 }}
+                rotation={[0, -0.4, 0]}
+                polar={[-Math.PI / 6, Math.PI / 6]}
+                azimuth={[-Math.PI / 1.5, Math.PI / 1.5]}
               >
-                <CarModel url={modelPath} isExplored={isExplored} />
-              </Stage>
-            </PresentationControls>
+                <Stage 
+                  environment="city" 
+                  intensity={0.6} 
+                  contactShadow={false}
+                  shadows="contact"
+                  adjustCamera={false}
+                >
+                  <CarModel url={modelPath} isExplored={isExplored} />
+                </Stage>
+              </PresentationControls>
 
-            <ContactShadows 
-              position={[0, -1.2, 0]} 
-              opacity={0.8} 
-              scale={20} 
-              blur={2} 
-              far={2} 
-              color="#000000"
+              <ContactShadows 
+                position={[0, -1.2, 0]} 
+                opacity={0.8} 
+                scale={20} 
+                blur={2} 
+                far={2} 
+                color="#000000"
+              />
+            </Suspense>
+
+            <PerspectiveCamera makeDefault position={[0, 1.5, 12]} fov={35} />
+
+            <OrbitControls 
+              makeDefault
+              enabled={!isExplored}
+              enableZoom={false} 
+              enablePan={false}
+              minPolarAngle={Math.PI / 2.4}
+              maxPolarAngle={Math.PI / 2.1}
+              autoRotate={!isExplored}
+              autoRotateSpeed={0.4}
             />
-          </Suspense>
-
-          <PerspectiveCamera makeDefault position={[0, 1.5, 12]} fov={35} />
-
-          <OrbitControls 
-            makeDefault
-            enabled={!isExplored}
-            enableZoom={false} 
-            enablePan={false}
-            minPolarAngle={Math.PI / 2.4}
-            maxPolarAngle={Math.PI / 2.1}
-            autoRotate={!isExplored}
-            autoRotateSpeed={0.4}
-          />
-          
-          <Environment preset="night" />
-        </Canvas>
+            
+            <Environment preset="night" />
+          </Canvas>
+        )}
       </div>
 
       {/* 4. INTERFACE: EXPLORATION HUD */}
