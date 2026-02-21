@@ -84,8 +84,8 @@ export default function Showcase() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
-  // Using a reliable public car model from Three.js examples
-  const modelPath = "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Ferrari.glb"; 
+  // Using the correct working URL for the Ferrari model from Three.js dev branch
+  const modelPath = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb"; 
 
   return (
     <div 
@@ -248,4 +248,4 @@ export default function Showcase() {
 }
 
 // Pre-load the asset
-useGLTF.preload("https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Ferrari.glb");
+useGLTF.preload("https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb");
