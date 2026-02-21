@@ -6,7 +6,6 @@ import {
   OrbitControls, 
   Stage, 
   useGLTF, 
-  PresentationControls, 
   ContactShadows, 
   Html, 
   useProgress,
@@ -15,11 +14,11 @@ import {
 import * as THREE from 'three';
 import { useNavigate } from 'react-router-dom';
 import CameraHandler, { ViewType } from '@/components/CameraHandler';
-import { Box, Camera, Maximize, Move, Square } from 'lucide-react';
+import { Box, Maximize, Move, Square } from 'lucide-react';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * Updated with View Presets and Smooth Camera Transitions
+ * Optimized for wide-angle viewing and smooth interaction
  */
 
 // --- 3D Components ---
@@ -191,38 +190,30 @@ export default function Showcase() {
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [0, 15, 150], fov: 45 }}
+          camera={{ position: [0, 40, 150], fov: 45, far: 2000 }}
           dpr={[1, 2]}
         >
           <color attach="background" args={['#050506']} />
           <Suspense fallback={<TechLoader />}>
             <CameraHandler view={currentView} />
             
-            <PresentationControls
-              enabled={isExplored}
-              global={false} 
-              rotation={[0, -0.4, 0]}
-              polar={[-Math.PI / 6, Math.PI / 6]}
-              azimuth={[-Math.PI / 1.5, Math.PI / 1.5]}
+            <Stage 
+              preset="rembrandt"
+              intensity={1} 
+              contactShadow={false}
+              shadows="contact"
+              adjustCamera={false} 
+              environment="city"
             >
-              <Stage 
-                preset="rembrandt"
-                intensity={1} 
-                contactShadow={false}
-                shadows="contact"
-                adjustCamera={false} 
-                environment="city"
-              >
-                <ErrorBoundary fallback={<ModelFallback />}>
-                   <LamborghiniModel url={modelPath} isExplored={isExplored} />
-                </ErrorBoundary>
-              </Stage>
-            </PresentationControls>
+              <ErrorBoundary fallback={<ModelFallback />}>
+                  <LamborghiniModel url={modelPath} isExplored={isExplored} />
+              </ErrorBoundary>
+            </Stage>
 
             <ContactShadows 
               position={[0, -1.2, 0]} 
               opacity={0.6} 
-              scale={20} 
+              scale={40} 
               blur={2} 
               color="#000000"
             />
@@ -232,10 +223,10 @@ export default function Showcase() {
             makeDefault
             enableZoom={true} 
             enablePan={true}
-            minDistance={5} 
-            maxDistance={100}
+            minDistance={10} 
+            maxDistance={500}
             autoRotate={true}
-            autoRotateSpeed={0.4} 
+            autoRotateSpeed={0.5} 
           />
           <Environment preset="night" />
         </Canvas>
