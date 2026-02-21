@@ -5,11 +5,13 @@ import { images, svgPaths } from "./kaaz/KaazAssets";
 import { KaazButton } from "./kaaz/KaazButton";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import Specifications from "@/components/Specifications";
 
 export default function Index() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#031015] text-white overflow-x-hidden relative font-sans">
@@ -84,7 +86,7 @@ export default function Index() {
             </p>
 
             <div className="flex flex-wrap gap-12 items-center py-4">
-              <KaazButton variant="explore" onClick={() => console.log('explore')}>
+              <KaazButton variant="explore" onClick={() => navigate('/showcase')}>
                 Explore
               </KaazButton>
               <KaazButton variant="reserve" onClick={() => console.log('reserve')}>
