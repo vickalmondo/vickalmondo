@@ -18,17 +18,15 @@ import { useNavigate } from 'react-router-dom';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * 3D INTEGRATION: LOCAL PUBLIC ASSET (.glb)
+ * 3D INTEGRATION: EXTERNAL ASSET (Ferrari GLB)
  */
 
 // --- 3D Components ---
 
 function LamborghiniModel({ url, isExplored }: { url: string; isExplored: boolean }) {
-  // Loading the GLB from your public folder path
   const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
 
-  // Handle material cleanup and shadow casting for the imported scene
   useEffect(() => {
     if (scene) {
       scene.traverse((node) => {
@@ -36,7 +34,6 @@ function LamborghiniModel({ url, isExplored }: { url: string; isExplored: boolea
           node.castShadow = true;
           node.receiveShadow = true;
           const mesh = node as THREE.Mesh;
-          // Optional: Increase material shine for the 'Carbon' look
           if (mesh.material) {
             (mesh.material as THREE.MeshStandardMaterial).envMapIntensity = 1.5;
           }
@@ -45,7 +42,6 @@ function LamborghiniModel({ url, isExplored }: { url: string; isExplored: boolea
     }
   }, [scene]);
 
-  // Subtle idle animation when in 'Hero' mode
   useFrame((state) => {
     if (group.current && !isExplored) {
       group.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
@@ -85,14 +81,12 @@ function TechLoader() {
   );
 }
 
-// --- Main Application ---
-
 export default function Showcase() {
   const [isExplored, setIsExplored] = useState(false);
   const navigate = useNavigate();
   
-  // Pointing directly to your public folder asset
-  const modelPath = "./scene.glb"; 
+  // Using a reliable external URL since the local scene.glb is missing
+  const modelPath = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb"; 
 
   return (
     <div 
@@ -250,5 +244,5 @@ export default function Showcase() {
   );
 }
 
-// Pre-load the local asset
-useGLTF.preload("./scene.glb");
+// Pre-load the asset
+useGLTF.preload("https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb");
