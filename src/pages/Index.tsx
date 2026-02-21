@@ -79,11 +79,11 @@ export default function Index() {
               <span className="block text-gray-400 font-medium text-3xl md:text-5xl lg:text-6xl mt-2">Engineered for the Elite.</span>
             </h1>
             
-            <p className="text-gray-400 text-sm md:text-lg max-w-md leading-relaxed mb-16 border-l-2 border-cyan-500/50 pl-4 font-light">
+            <p className="text-gray-400 text-sm md:text-lg max-w-md leading-relaxed mb-12 border-l-2 border-cyan-500/50 pl-4 font-light">
               A next-generation hypercar built for precision, dominance, and uncompromising innovation.
             </p>
 
-            <div className="flex flex-col gap-12 items-start">
+            <div className="flex flex-wrap gap-8 items-center">
               <KaazButton variant="explore" onClick={() => console.log('explore')}>
                 Explore
               </KaazButton>
