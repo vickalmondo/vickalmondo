@@ -19,7 +19,7 @@ import { Box, Maximize, Move, Square } from 'lucide-react';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * FIX: Camera Distance and Framing Logic applied
+ * Unlocked camera for wide-range viewing
  */
 
 // --- 3D Components ---
@@ -156,7 +156,7 @@ export default function Showcase() {
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [10, 5, 12], fov: 45 }}
+          camera={{ position: [40, 20, 40], fov: 45, far: 2000 }}
           dpr={[1, 2]}
         >
           <color attach="background" args={['#050506']} />
@@ -184,7 +184,7 @@ export default function Showcase() {
             <ContactShadows 
               position={[0, -1.2, 0]} 
               opacity={0.4} 
-              scale={20} 
+              scale={40} 
               blur={2} 
               color="#000000"
             />
@@ -193,10 +193,10 @@ export default function Showcase() {
           <OrbitControls 
             makeDefault
             enableZoom={true} 
-            enablePan={false}
-            minDistance={5} 
-            maxDistance={20}
-            autoRotate={!isExplored}
+            enablePan={true}
+            minDistance={2} 
+            maxDistance={1000}
+            autoRotate={true}
             autoRotateSpeed={0.5}
             target={[0, 0, 0]} 
           />

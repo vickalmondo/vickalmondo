@@ -10,12 +10,12 @@ interface CameraHandlerProps {
   view: ViewType;
 }
 
-// Updated configs to match the new scale (5-20 range)
+// Significantly increased distances to allow for a "far away" perspective
 const VIEW_CONFIGS: Record<ViewType, { position: [number, number, number]; target: [number, number, number] }> = {
-  front: { position: [0, 1, 12], target: [0, 0, 0] },
-  top: { position: [0, 18, 0], target: [0, 0, 0] },
-  side: { position: [14, 1, 0], target: [0, 0, 0] },
-  perspective: { position: [10, 5, 12], target: [0, 0, 0] },
+  front: { position: [0, 2, 40], target: [0, 0, 0] },
+  top: { position: [0, 60, 0], target: [0, 0, 0] },
+  side: { position: [50, 2, 0], target: [0, 0, 0] },
+  perspective: { position: [40, 20, 40], target: [0, 0, 0] },
 };
 
 const CameraHandler = ({ view }: CameraHandlerProps) => {
@@ -49,7 +49,7 @@ const CameraHandler = ({ view }: CameraHandlerProps) => {
       camera.lookAt(targetLookAt.current);
     }
 
-    if (camera.position.distanceTo(targetPos.current) < 0.01) {
+    if (camera.position.distanceTo(targetPos.current) < 0.1) {
       isAnimating.current = false;
     }
   });
