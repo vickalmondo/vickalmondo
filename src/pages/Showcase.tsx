@@ -14,10 +14,12 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { useNavigate } from 'react-router-dom';
+import CameraHandler, { ViewType } from '@/components/CameraHandler';
+import { Box, Camera, Maximize, Move, Square } from 'lucide-react';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * Updated for extreme zoom and better framing
+ * Updated with View Presets and Smooth Camera Transitions
  */
 
 // --- 3D Components ---
@@ -29,7 +31,6 @@ interface LamborghiniModelProps {
 
 function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
   const group = useRef<THREE.Group>(null);
-  
   const { scene } = useGLTF(url);
 
   const cleanScene = useMemo(() => {
@@ -106,9 +107,17 @@ function TechLoader() {
 
 export default function Showcase() {
   const [isExplored, setIsExplored] = useState(false);
+  const [currentView, setCurrentView] = useState<ViewType>('perspective');
   const navigate = useNavigate();
   
   const modelPath = "/scene.glb"; 
+
+  const viewOptions: { id: ViewType; label: string; icon: any }[] = [
+    { id: 'perspective', label: 'ISO', icon: Maximize },
+    { id: 'front', label: 'FRT', icon: Square },
+    { id: 'side', label: 'SID', icon: Move },
+    { id: 'top', label: 'TOP', icon: Box },
+  ];
 
   return (
     <div className="relative h-screen w-full bg-[#050506] text-white font-sans overflow-hidden">
@@ -128,6 +137,31 @@ export default function Showcase() {
         </div>
       </nav>
 
+      {/* UI: SIDE VIEW CONTROLS */}
+      <div className="absolute right-8 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4">
+        {viewOptions.map((option) => (
+          <button
+            key={option.id}
+            onClick={() => {
+              setCurrentView(option.id);
+              setIsExplored(true);
+            }}
+            className={`w-12 h-12 flex flex-col items-center justify-center border transition-all duration-300 group relative
+              ${currentView === option.id 
+                ? 'bg-[#00f2ff] border-[#00f2ff] text-black' 
+                : 'bg-black/40 border-white/10 text-white/40 hover:border-[#00f2ff]/50 hover:text-white'}`}
+          >
+            <option.icon size={14} className="mb-1" />
+            <span className="text-[7px] font-black tracking-tighter">{option.label}</span>
+            
+            {/* Tooltip */}
+            <div className="absolute right-full mr-4 px-3 py-1 bg-black border border-white/10 text-[8px] tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+              {option.id} View
+            </div>
+          </button>
+        ))}
+      </div>
+
       {/* UI: HERO TEXT */}
       <div 
         className={`absolute inset-0 z-20 flex flex-col justify-center px-10 transition-all duration-1000 
@@ -142,7 +176,10 @@ export default function Showcase() {
             Aerodynamic excellence forged in the virtual wind tunnel.
           </p>
           <button 
-            onClick={() => setIsExplored(true)}
+            onClick={() => {
+              setIsExplored(true);
+              setCurrentView('perspective');
+            }}
             className="px-10 py-4 border border-[#00f2ff]/40 text-[#00f2ff] font-bold uppercase tracking-[0.3em] text-[9px] hover:bg-[#00f2ff] hover:text-black transition-all"
           >
             Examine Chassis
@@ -154,11 +191,13 @@ export default function Showcase() {
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [0, 15, 150], fov: 45 }} // Moved camera much further back and higher
+          camera={{ position: [0, 15, 150], fov: 45 }}
           dpr={[1, 2]}
         >
           <color attach="background" args={['#050506']} />
           <Suspense fallback={<TechLoader />}>
+            <CameraHandler view={currentView} />
+            
             <PresentationControls
               enabled={isExplored}
               global={false} 
@@ -193,11 +232,10 @@ export default function Showcase() {
             makeDefault
             enableZoom={true} 
             enablePan={true}
-            minDistance={5} 
-            maxDistance={500} // Massive zoom out capability
+            minDistance={2} 
+            maxDistance={500}
             autoRotate={!isExplored}
             autoRotateSpeed={0.8} 
-            target={[0, 0, 0]} 
           />
           <Environment preset="night" />
         </Canvas>
@@ -206,7 +244,10 @@ export default function Showcase() {
       {/* UI: BACK BUTTON */}
       {isExplored && (
         <button 
-          onClick={() => setIsExplored(false)}
+          onClick={() => {
+            setIsExplored(false);
+            setCurrentView('perspective');
+          }}
           className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 text-white/50 hover:text-[#00f2ff] transition-all group pointer-events-auto"
         >
           <span className="text-[9px] font-bold uppercase tracking-[0.4em]">Return to Hangar</span>
