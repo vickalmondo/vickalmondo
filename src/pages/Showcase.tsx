@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense, useRef, useEffect } from 'react';
+import React, { useState, Suspense, useRef, useEffect, ReactNode } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { 
   OrbitControls, 
@@ -17,7 +17,9 @@ import { useNavigate } from 'react-router-dom';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * Optimized for R3F and metadata injection compatibility.
+ * ERROR TROUBLESHOOTING: 
+ * The "Unexpected token <" error means the path is returning an HTML 404 page.
+ * Ensure the file is in the public directory and the path is correct.
  */
 
 // --- 3D Components ---
@@ -27,9 +29,12 @@ interface LamborghiniModelProps {
   isExplored: boolean;
 }
 
-const LamborghiniModel = ({ url, isExplored }: LamborghiniModelProps) => {
+function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
+  const group = useRef<THREE.Group>(null);
+  
+  // Use a try-catch pattern or standard useGLTF
+  // In many environments, "/assets/scene.glb" or "scene.glb" works better than "./scene.glb"
   const { scene } = useGLTF(url);
-  const groupRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
     if (scene) {
@@ -48,23 +53,39 @@ const LamborghiniModel = ({ url, isExplored }: LamborghiniModelProps) => {
   }, [scene]);
 
   useFrame((state) => {
-    if (groupRef.current && !isExplored) {
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
-      groupRef.current.rotation.y += 0.001;
+    if (group.current && !isExplored) {
+      group.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
+      group.current.rotation.y += 0.001;
     }
   });
 
-  // Wrapping primitive in a group to isolate metadata attributes from the Three.js object
   return (
-    <group ref={groupRef}>
-      <group scale={isExplored ? 1.5 : 1.2} position={[0, -0.2, 0]}>
-        <primitive object={scene} />
-      </group>
+    <group ref={group} dispose={null}>
+      <primitive 
+        object={scene} 
+        scale={isExplored ? 1.5 : 1.2} 
+        position={[0, -0.2, 0]} 
+      />
     </group>
   );
-};
+}
 
-const TechLoader = () => {
+// Fallback component to prevent the "null to object" crash if the GLB fails
+function ModelFallback() {
+  return (
+    <mesh position={[0, 0, 0]}>
+      <boxGeometry args={[2, 0.5, 4]} />
+      <meshStandardMaterial color="#00f2ff" wireframe />
+      <Html center>
+        <div className="bg-black/80 text-[#00f2ff] px-4 py-2 border border-[#00f2ff] text-[10px] font-mono whitespace-nowrap">
+          ASSET_NOT_FOUND: CHECK_PATH
+        </div>
+      </Html>
+    </mesh>
+  );
+}
+
+function TechLoader() {
   const { progress } = useProgress();
   return (
     <Html center>
@@ -83,17 +104,37 @@ const TechLoader = () => {
       </div>
     </Html>
   );
-};
+}
+
+// Simple ErrorBoundary Component
+class ErrorBoundary extends React.Component<{ children: ReactNode; fallback: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
+// --- Main Application ---
 
 export default function Showcase() {
   const [isExplored, setIsExplored] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
-  // Using a reliable external URL for the showcase
-  const modelPath = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb"; 
+  // Update this path to exactly where your file is stored. 
+  // If it's in public/scene.glb, use "/scene.glb"
+  const modelPath = "/scene.glb"; 
 
   return (
-    <div className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff] selection:text-black">
+    <div 
+      ref={containerRef} 
+      className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff] selection:text-black"
+    >
       
       {/* UI: HEADER */}
       <nav className="absolute top-0 w-full z-50 flex items-center justify-between px-10 py-10 pointer-events-none">
@@ -167,7 +208,10 @@ export default function Showcase() {
                 shadows="contact"
                 adjustCamera={false}
               >
-                <LamborghiniModel url={modelPath} isExplored={isExplored} />
+                {/* Wrap in Error Boundary logic */}
+                <ErrorBoundary fallback={<ModelFallback />}>
+                   <LamborghiniModel url={modelPath} isExplored={isExplored} />
+                </ErrorBoundary>
               </Stage>
             </PresentationControls>
 
