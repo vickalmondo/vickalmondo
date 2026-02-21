@@ -64,7 +64,7 @@ function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
     <group ref={group} dispose={null}>
       <primitive 
         object={cleanScene} 
-        scale={isExplored ? 1.6 : 1.4} // Increased scale to fix "zoomed out" look
+        scale={isExplored ? 1.6 : 1.4} 
         position={[0, -0.2, 0]} 
       />
     </group>
@@ -158,7 +158,7 @@ export default function Showcase() {
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [0, 1, 8], fov: 30 }} // Adjusted camera for better initial framing
+          camera={{ position: [0, 1, 12], fov: 45 }} // Standard FOV and moved back slightly
           dpr={[1, 2]}
         >
           <color attach="background" args={['#050506']} />
@@ -176,7 +176,7 @@ export default function Showcase() {
                 intensity={1} 
                 contactShadow={false}
                 shadows="contact"
-                adjustCamera={false} // Prevent Stage from overriding our custom camera
+                adjustCamera={false} 
                 environment="city"
               >
                 <ErrorBoundary fallback={<ModelFallback />}>
@@ -194,20 +194,15 @@ export default function Showcase() {
             />
           </Suspense>
 
-          {/* OrbitControls:
-              - makeDefault allows other helpers to respect it
-              - autoRotate is set to true by default but we control speed
-              - enableZoom/enablePan enabled for full navigation
-          */}
           <OrbitControls 
             makeDefault
             enableZoom={true} 
             enablePan={true}
-            minDistance={4}
-            maxDistance={15}
+            minDistance={2} // Lowered for closer inspection
+            maxDistance={25} // Expanded for wider pull-back
             autoRotate={!isExplored}
-            autoRotateSpeed={0.8} // Slower, more elegant rotation
-            target={[0, 0, 0]} // Ensures rotation is centered on the car
+            autoRotateSpeed={0.8} 
+            target={[0, 0, 0]} 
           />
           <Environment preset="night" />
         </Canvas>
