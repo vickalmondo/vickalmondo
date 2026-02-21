@@ -145,9 +145,8 @@ export default function Showcase() {
         <Canvas 
           shadows 
           dpr={[1, 2]}
-          // Using document.body as a stable event source to prevent null pointer errors during cleanup
-          eventSource={typeof document !== 'undefined' ? document.body : undefined}
-          eventPrefix="client"
+          // Using the container ref as the event source is the most stable way to handle R3F events
+          eventSource={containerRef}
         >
           <color attach="background" args={['#050506']} />
           <fog attach="fog" args={['#050506', 10, 25]} />
