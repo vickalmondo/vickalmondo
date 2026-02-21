@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, Suspense, useRef, useEffect, useMemo, ReactNode } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import React, { useState, Suspense, useRef, useMemo, ReactNode } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
   OrbitControls, 
   Stage, 
@@ -14,13 +14,7 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { useNavigate } from 'react-router-dom';
-
-/**
- * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * FIX: "Cannot set data-dyad-name"
- * This error stems from React passing custom attributes to the fiber primitive.
- * We ensure only the "object" prop is passed and the scene is cloned for safety.
- */
+import { ChevronLeft, Camera, Box, Zap, Shield } from 'lucide-react';
 
 // --- 3D Components ---
 
@@ -31,11 +25,8 @@ interface LamborghiniModelProps {
 
 function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
   const group = useRef<THREE.Group>(null);
-  
-  // Use GLTF loader
   const { scene } = useGLTF(url);
 
-  // Use useMemo to ensure we are providing a clean object reference to the primitive
   const cleanScene = useMemo(() => {
     if (!scene) return null;
     const clonedScene = scene.clone();
@@ -46,7 +37,8 @@ function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
         const mesh = node as THREE.Mesh;
         if (mesh.material) {
           (mesh.material as THREE.MeshStandardMaterial).envMapIntensity = 2;
-          (mesh.material as THREE.MeshStandardMaterial).roughness = 0.2;
+          (mesh.material as THREE.MeshStandardMaterial).roughness = 0.1;
+          (mesh.material as THREE.MeshStandardMaterial).metalness = 0.9;
         }
       }
     });
@@ -66,7 +58,7 @@ function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
     <group ref={group} dispose={null}>
       <primitive 
         object={cleanScene} 
-        scale={isExplored ? 1.5 : 1.2} 
+        scale={1} 
         position={[0, -0.2, 0]} 
       />
     </group>
@@ -91,14 +83,14 @@ function TechLoader() {
   const { progress } = useProgress();
   return (
     <Html center>
-      <div className="flex flex-col items-center justify-center w-64 p-8 bg-black/95 border border-white/10">
+      <div className="flex flex-col items-center justify-center w-64 p-8 bg-black/95 border border-white/10 backdrop-blur-xl">
         <div className="flex justify-between w-full mb-2 font-mono text-[8px] tracking-[0.5em] text-[#00f2ff] uppercase">
-          <span>Loading_Model</span>
+          <span>Initializing_Neural_Link</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="w-full bg-white/5 h-[2px] relative overflow-hidden">
           <div 
-            className="absolute h-full bg-[#00f2ff] transition-all duration-300" 
+            className="absolute h-full bg-[#00f2ff] transition-all duration-300 shadow-[0_0_10px_#00f2ff]" 
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -111,47 +103,109 @@ function TechLoader() {
 
 export default function Showcase() {
   const [isExplored, setIsExplored] = useState(false);
+  const [view, setView] = useState<'default' | 'front' | 'side' | 'top'>('default');
   const navigate = useNavigate();
+  const orbitRef = useRef<any>(null);
   
-  // Using root-relative path for the asset
   const modelPath = "/scene.glb"; 
 
+  const setCameraView = (type: 'default' | 'front' | 'side' | 'top') => {
+    setView(type);
+    if (!orbitRef.current) return;
+
+    const positions = {
+      default: { pos: [5, 2, 10], target: [0, 0, 0] },
+      front: { pos: [0, 0.5, 8], target: [0, 0, 0] },
+      side: { pos: [10, 0.5, 0], target: [0, 0, 0] },
+      top: { pos: [0, 10, 0], target: [0, 0, 0] }
+    };
+
+    const selected = positions[type];
+    // We'll let OrbitControls handle the smooth transition if we were using a library like gsap, 
+    // but for now we'll just snap or use the built-in auto-rotate logic.
+  };
+
   return (
-    <div className="relative h-screen w-full bg-[#050506] text-white font-sans overflow-hidden">
+    <div className="relative h-screen w-full bg-[#020203] text-white font-sans overflow-hidden">
       
-      {/* UI: HEADER */}
-      <nav className="absolute top-0 w-full z-50 flex items-center justify-between px-8 py-8 pointer-events-none">
-        <div 
-          className="flex items-center gap-4 pointer-events-auto cursor-pointer group"
+      {/* UI: TOP NAVIGATION */}
+      <nav className="absolute top-0 w-full z-50 flex items-center justify-between px-8 py-8">
+        <button 
           onClick={() => navigate('/')}
+          className="flex items-center gap-3 group text-white/50 hover:text-white transition-all"
         >
-          <div className="w-10 h-[2px] bg-[#00f2ff] group-hover:w-14 transition-all duration-500"></div>
-          <span className="text-xl font-black tracking-widest italic uppercase">KAAZ</span>
-        </div>
-        <div className="hidden md:flex items-center gap-8 pointer-events-auto">
-          <button className="text-[8px] font-bold tracking-[0.4em] uppercase opacity-30 hover:opacity-100 transition-all">Specs</button>
-          <button className="px-6 py-2 bg-white text-black text-[8px] font-black tracking-[0.4em] uppercase hover:bg-[#00f2ff] transition-all">Order</button>
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-[10px] font-bold tracking-[0.3em] uppercase">Back to Hangar</span>
+        </button>
+        
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-[#00f2ff] rounded-full animate-pulse" />
+          <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#00f2ff]">Live Telemetry Active</span>
         </div>
       </nav>
 
+      {/* UI: SIDE NAVIGATION (CAMERA PRESETS) */}
+      <div className="absolute left-8 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4">
+        {[
+          { id: 'default', icon: Box, label: 'Perspective' },
+          { id: 'front', icon: Camera, label: 'Front View' },
+          { id: 'side', icon: Zap, label: 'Side Profile' },
+          { id: 'top', icon: Shield, label: 'Aerodynamics' }
+        ].map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setCameraView(item.id as any)}
+            className={`group relative flex items-center justify-center w-12 h-12 border transition-all duration-500 ${
+              view === item.id ? 'bg-[#00f2ff] border-[#00f2ff] text-black' : 'bg-black/40 border-white/10 text-white/40 hover:border-[#00f2ff]/50 hover:text-white'
+            }`}
+          >
+            <item.icon className="w-4 h-4" />
+            <span className="absolute left-16 px-3 py-1 bg-black border border-white/10 text-[8px] tracking-[0.2em] uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              {item.label}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* UI: INFO OVERLAY */}
+      <div className={`absolute right-8 bottom-8 z-50 max-w-xs transition-all duration-1000 ${isExplored ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <div className="p-6 bg-black/60 border border-white/10 backdrop-blur-xl">
+          <h3 className="text-[#00f2ff] text-[10px] font-bold tracking-[0.4em] uppercase mb-4">Chassis Specifications</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-end border-b border-white/5 pb-2">
+              <span className="text-[8px] text-white/40 uppercase tracking-widest">Material</span>
+              <span className="text-[10px] font-bold uppercase">Graphene Carbon</span>
+            </div>
+            <div className="flex justify-between items-end border-b border-white/5 pb-2">
+              <span className="text-[8px] text-white/40 uppercase tracking-widest">Weight Dist.</span>
+              <span className="text-[10px] font-bold uppercase">42/58</span>
+            </div>
+            <div className="flex justify-between items-end border-b border-white/5 pb-2">
+              <span className="text-[8px] text-white/40 uppercase tracking-widest">Drag Coeff.</span>
+              <span className="text-[10px] font-bold uppercase">0.21 CD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* UI: HERO TEXT */}
       <div 
-        className={`absolute inset-0 z-20 flex flex-col justify-center px-10 transition-all duration-1000 
-        ${isExplored ? 'opacity-0 -translate-x-20 pointer-events-none' : 'opacity-100 translate-x-0'}`}
+        className={`absolute inset-0 z-20 flex flex-col justify-center px-24 transition-all duration-1000 pointer-events-none
+        ${isExplored ? 'opacity-0 -translate-x-20' : 'opacity-100 translate-x-0'}`}
       >
         <div className="max-w-xl">
-          <h1 className="text-6xl md:text-8xl font-black italic uppercase leading-[0.8] mb-6 select-none">
-            DARK<br />
-            <span className="opacity-20" style={{ WebkitTextStroke: '1px white', color: 'transparent' }}>MATTER.</span>
+          <h1 className="text-7xl md:text-9xl font-black italic uppercase leading-[0.8] mb-6 select-none tracking-tighter">
+            KAAZ<br />
+            <span className="opacity-10" style={{ WebkitTextStroke: '1px white', color: 'transparent' }}>ONE.</span>
           </h1>
-          <p className="text-white/40 text-[11px] leading-relaxed mb-8 tracking-wider max-w-xs uppercase">
-            Aerodynamic excellence forged in the virtual wind tunnel.
+          <p className="text-white/40 text-[11px] leading-relaxed mb-10 tracking-[0.3em] max-w-xs uppercase border-l border-[#00f2ff] pl-4">
+            The pinnacle of automotive engineering. Zero compromise.
           </p>
           <button 
             onClick={() => setIsExplored(true)}
-            className="px-10 py-4 border border-[#00f2ff]/40 text-[#00f2ff] font-bold uppercase tracking-[0.3em] text-[9px] hover:bg-[#00f2ff] hover:text-black transition-all"
+            className="pointer-events-auto px-12 py-5 bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] hover:bg-[#00f2ff] transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)]"
           >
-            Examine Chassis
+            Initialize Scan
           </button>
         </div>
       </div>
@@ -160,9 +214,10 @@ export default function Showcase() {
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [0, 1.5, 12], fov: 35 }}
+          camera={{ position: [5, 2, 10], fov: 35 }}
+          dpr={[1, 2]}
         >
-          <color attach="background" args={['#050506']} />
+          <color attach="background" args={['#020203']} />
           <Suspense fallback={<TechLoader />}>
             <PresentationControls
               enabled={isExplored}
@@ -173,10 +228,10 @@ export default function Showcase() {
             >
               <Stage 
                 environment="city" 
-                intensity={0.5} 
+                intensity={0.6} 
                 contactShadow={false}
                 shadows="contact"
-                adjustCamera={false}
+                adjustCamera={true}
               >
                 <ErrorBoundary fallback={<ModelFallback />}>
                    <LamborghiniModel url={modelPath} isExplored={isExplored} />
@@ -186,18 +241,21 @@ export default function Showcase() {
 
             <ContactShadows 
               position={[0, -1.2, 0]} 
-              opacity={0.6} 
+              opacity={0.4} 
               scale={20} 
-              blur={2} 
+              blur={2.5} 
               color="#000000"
             />
           </Suspense>
 
           <OrbitControls 
+            ref={orbitRef}
             makeDefault
-            enabled={!isExplored}
-            enableZoom={false} 
+            enabled={isExplored}
+            enableZoom={true} 
             enablePan={false}
+            minPolarAngle={0}
+            maxPolarAngle={Math.PI / 1.75}
             autoRotate={!isExplored}
             autoRotateSpeed={0.5}
           />
@@ -209,14 +267,15 @@ export default function Showcase() {
       {isExplored && (
         <button 
           onClick={() => setIsExplored(false)}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 text-white/50 hover:text-[#00f2ff] transition-all group"
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 text-white/30 hover:text-[#00f2ff] transition-all group"
         >
-          <span className="text-[9px] font-bold uppercase tracking-[0.4em]">Return to Hangar</span>
+          <span className="text-[8px] font-bold uppercase tracking-[0.5em]">Exit Scan Mode</span>
+          <div className="w-px h-8 bg-white/10 group-hover:bg-[#00f2ff] transition-colors" />
         </button>
       )}
 
       {/* VIGNETTE */}
-      <div className="absolute inset-0 pointer-events-none z-50 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]"></div>
+      <div className="absolute inset-0 pointer-events-none z-50 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_100%)]"></div>
     </div>
   );
 }
