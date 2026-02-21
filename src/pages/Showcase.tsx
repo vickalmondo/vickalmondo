@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense, useRef, useEffect } from 'react';
+import React, { useState, Suspense, useRef, useEffect, ReactNode } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { 
   OrbitControls, 
@@ -10,22 +10,31 @@ import {
   ContactShadows, 
   Html, 
   useProgress,
-  Environment,
-  PerspectiveCamera
+  Environment
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { useNavigate } from 'react-router-dom';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * 3D INTEGRATION: EXTERNAL ASSET (Ferrari GLB)
+ * ERROR TROUBLESHOOTING: 
+ * The "Unexpected token <" error means the path is returning an HTML 404 page.
+ * Ensure the file is in the public directory and the path is correct.
  */
 
 // --- 3D Components ---
 
-function LamborghiniModel({ url, isExplored }: { url: string; isExplored: boolean }) {
-  const { scene } = useGLTF(url);
+interface LamborghiniModelProps {
+  url: string;
+  isExplored: boolean;
+}
+
+function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
   const group = useRef<THREE.Group>(null);
+  
+  // Use a try-catch pattern or standard useGLTF
+  // In many environments, "/assets/scene.glb" or "scene.glb" works better than "./scene.glb"
+  const { scene } = useGLTF(url);
 
   useEffect(() => {
     if (scene) {
@@ -35,7 +44,8 @@ function LamborghiniModel({ url, isExplored }: { url: string; isExplored: boolea
           node.receiveShadow = true;
           const mesh = node as THREE.Mesh;
           if (mesh.material) {
-            (mesh.material as THREE.MeshStandardMaterial).envMapIntensity = 1.5;
+            (mesh.material as THREE.MeshStandardMaterial).envMapIntensity = 2;
+            (mesh.material as THREE.MeshStandardMaterial).roughness = 0.2;
           }
         }
       });
@@ -53,10 +63,25 @@ function LamborghiniModel({ url, isExplored }: { url: string; isExplored: boolea
     <group ref={group} dispose={null}>
       <primitive 
         object={scene} 
-        scale={isExplored ? 1.4 : 1.1} 
+        scale={isExplored ? 1.5 : 1.2} 
         position={[0, -0.2, 0]} 
       />
     </group>
+  );
+}
+
+// Fallback component to prevent the "null to object" crash if the GLB fails
+function ModelFallback() {
+  return (
+    <mesh position={[0, 0, 0]}>
+      <boxGeometry args={[2, 0.5, 4]} />
+      <meshStandardMaterial color="#00f2ff" wireframe />
+      <Html center>
+        <div className="bg-black/80 text-[#00f2ff] px-4 py-2 border border-[#00f2ff] text-[10px] font-mono whitespace-nowrap">
+          ASSET_NOT_FOUND: CHECK_PATH
+        </div>
+      </Html>
+    </mesh>
   );
 }
 
@@ -81,19 +106,37 @@ function TechLoader() {
   );
 }
 
+// Simple ErrorBoundary Component
+class ErrorBoundary extends React.Component<{ children: ReactNode; fallback: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
+// --- Main Application ---
+
 export default function Showcase() {
   const [isExplored, setIsExplored] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
-  // Using a reliable external URL since the local scene.glb is missing
-  const modelPath = "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb"; 
+  // Update this path to exactly where your file is stored. 
+  // If it's in public/scene.glb, use "/scene.glb"
+  const modelPath = "/scene.glb"; 
 
   return (
     <div 
+      ref={containerRef} 
       className="relative min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-[#00f2ff] selection:text-black"
     >
       
-      {/* 1. INTERFACE: HEADER */}
+      {/* UI: HEADER */}
       <nav className="absolute top-0 w-full z-50 flex items-center justify-between px-10 py-10 pointer-events-none">
         <div 
           className="flex items-center gap-4 pointer-events-auto group cursor-pointer"
@@ -102,15 +145,14 @@ export default function Showcase() {
           <div className="w-12 h-[2px] bg-[#00f2ff] shadow-[0_0_15px_#00f2ff] group-hover:w-16 transition-all duration-500"></div>
           <span className="text-2xl font-black tracking-tighter uppercase italic text-white">KAAZ</span>
         </div>
-        
-        <div className="flex items-center gap-10 pointer-events-auto">
+        <div className="hidden md:flex items-center gap-10 pointer-events-auto">
           <button className="text-[9px] font-bold tracking-[0.4em] uppercase opacity-30 hover:opacity-100 hover:text-[#00f2ff] transition-all">Propulsion</button>
           <button className="text-[9px] font-bold tracking-[0.4em] uppercase opacity-30 hover:opacity-100 hover:text-[#00f2ff] transition-all">Aerodynamics</button>
           <button className="px-8 py-3 bg-white text-black text-[9px] font-black tracking-[0.4em] uppercase hover:bg-[#00f2ff] transition-all shadow-xl">Reserve</button>
         </div>
       </nav>
 
-      {/* 2. INTERFACE: HERO TEXT */}
+      {/* UI: HERO TEXT */}
       <div 
         className={`absolute inset-0 z-20 flex flex-col justify-center px-10 transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] 
         ${isExplored ? 'opacity-0 -translate-x-32 pointer-events-none' : 'opacity-100 translate-x-0'}`}
@@ -120,16 +162,13 @@ export default function Showcase() {
             <span className="h-[1px] w-12 bg-[#00f2ff]"></span>
             <span className="text-[#00f2ff] font-mono text-[9px] tracking-[0.6em] uppercase">Architecture: V12_Carbon</span>
           </div>
-          
-          <h1 className="text-6xl md:text-[10rem] font-black tracking-tighter italic uppercase leading-[0.75] mb-10 select-none text-white">
+          <h1 className="text-7xl md:text-[10rem] font-black tracking-tighter italic uppercase leading-[0.75] mb-10 select-none text-white">
             DARK<br />
             <span className="text-transparent stroke-text opacity-40">MATTER.</span>
           </h1>
-          
           <p className="max-w-md text-white/40 text-[13px] leading-loose mb-12 font-medium tracking-wide">
             A relentless pursuit of velocity. Forged in the digital grid, optimized for performance. The peak of aerodynamic efficiency and raw V12 dominance.
           </p>
-          
           <button 
             onClick={() => setIsExplored(true)}
             className="group relative px-14 py-6 bg-transparent border border-[#00f2ff]/30 text-[#00f2ff] font-black uppercase tracking-[0.3em] text-[10px] overflow-hidden hover:border-[#00f2ff] transition-all"
@@ -140,7 +179,7 @@ export default function Showcase() {
         </div>
       </div>
 
-      {/* 3. CORE: 3D ENGINE */}
+      {/* CORE: 3D ENGINE */}
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
@@ -162,13 +201,17 @@ export default function Showcase() {
               azimuth={[-Math.PI / 1.5, Math.PI / 1.5]}
             >
               <Stage 
+                key={isExplored ? 'explored' : 'hero'}
                 environment="city" 
                 intensity={0.6} 
                 contactShadow={false}
                 shadows="contact"
                 adjustCamera={false}
               >
-                <LamborghiniModel url={modelPath} isExplored={isExplored} />
+                {/* Wrap in Error Boundary logic */}
+                <ErrorBoundary fallback={<ModelFallback />}>
+                   <LamborghiniModel url={modelPath} isExplored={isExplored} />
+                </ErrorBoundary>
               </Stage>
             </PresentationControls>
 
@@ -192,12 +235,11 @@ export default function Showcase() {
             autoRotate={!isExplored}
             autoRotateSpeed={0.4}
           />
-          
           <Environment preset="night" />
         </Canvas>
       </div>
 
-      {/* 4. INTERFACE: EXPLORATION HUD */}
+      {/* UI: EXPLORATION HUD */}
       <div 
         className={`absolute bottom-16 w-full z-40 px-10 flex justify-between items-end transition-all duration-1000 delay-100
         ${isExplored ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20 pointer-events-none'}`}
@@ -208,7 +250,6 @@ export default function Showcase() {
             <h3 className="text-4xl font-black italic uppercase tracking-tighter text-white">Carbon Chassis</h3>
             <div className="h-[2px] w-20 bg-[#00f2ff] shadow-[0_0_10px_#00f2ff]"></div>
           </div>
-          
           <button 
             onClick={() => setIsExplored(false)}
             className="flex items-center gap-4 text-white/30 hover:text-white transition-all group pb-2"
@@ -217,21 +258,12 @@ export default function Showcase() {
             <span className="text-[9px] font-bold uppercase tracking-[0.4em]">Deactivate Neural Link</span>
           </button>
         </div>
-
-        <div className="text-right flex flex-col items-end">
-           <div className="flex items-baseline gap-2 mb-2">
-             <span className="text-7xl font-black italic tracking-tighter text-white">12</span>
-             <span className="text-2xl font-bold tracking-widest text-[#00f2ff] opacity-80 uppercase font-mono">Cylinders</span>
-           </div>
-           <p className="text-[9px] font-bold uppercase tracking-[0.6em] text-white/20">Optimal Performance Threshold</p>
-        </div>
       </div>
 
-      {/* 5. AESTHETIC LAYERS */}
+      {/* AESTHETIC LAYERS */}
       <div className="absolute inset-0 pointer-events-none z-50">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.7)_100%)]"></div>
         <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,4px_100%]"></div>
-        <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-[#00f2ff]/20 to-transparent"></div>
       </div>
 
       <style>{`
@@ -243,6 +275,3 @@ export default function Showcase() {
     </div>
   );
 }
-
-// Pre-load the asset
-useGLTF.preload("https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb");
