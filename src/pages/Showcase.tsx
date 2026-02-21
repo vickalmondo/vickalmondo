@@ -23,7 +23,7 @@ import { useNavigate } from 'react-router-dom';
 
 // --- 3D Components ---
 
-function LamborghiniModel({ url, isExplored }: { url: string; isExplored: boolean }) {
+function CarModel({ url, isExplored }: { url: string; isExplored: boolean }) {
   const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
 
@@ -84,8 +84,8 @@ export default function Showcase() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
-  // Using a high-quality public Lamborghini model for immediate preview
-  const modelPath = "https://raw.githubusercontent.com/pmndrs/drei-assets/master/lamborghini_v12_vision_gran_turismo.glb"; 
+  // Using a reliable public car model from Three.js examples
+  const modelPath = "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Ferrari.glb"; 
 
   return (
     <div 
@@ -169,7 +169,7 @@ export default function Showcase() {
                 shadows="contact"
                 adjustCamera={false}
               >
-                <LamborghiniModel url={modelPath} isExplored={isExplored} />
+                <CarModel url={modelPath} isExplored={isExplored} />
               </Stage>
             </PresentationControls>
 
@@ -248,4 +248,4 @@ export default function Showcase() {
 }
 
 // Pre-load the asset
-useGLTF.preload("https://raw.githubusercontent.com/pmndrs/drei-assets/master/lamborghini_v12_vision_gran_turismo.glb");
+useGLTF.preload("https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Ferrari.glb");
