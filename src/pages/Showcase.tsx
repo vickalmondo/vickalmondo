@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * FIX: Zoom issues and rotation constraints
+ * Updated for extreme zoom capabilities
  */
 
 // --- 3D Components ---
@@ -30,10 +30,8 @@ interface LamborghiniModelProps {
 function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
   const group = useRef<THREE.Group>(null);
   
-  // Use GLTF loader
   const { scene } = useGLTF(url);
 
-  // Use useMemo to ensure we are providing a clean object reference to the primitive
   const cleanScene = useMemo(() => {
     if (!scene) return null;
     const clonedScene = scene.clone();
@@ -51,7 +49,6 @@ function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
     return clonedScene;
   }, [scene]);
 
-  // Handle subtle floating animation when not being actively controlled
   useFrame((state) => {
     if (group.current && !isExplored) {
       group.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
@@ -111,7 +108,6 @@ export default function Showcase() {
   const [isExplored, setIsExplored] = useState(false);
   const navigate = useNavigate();
   
-  // Using root-relative path for the asset
   const modelPath = "/scene.glb"; 
 
   return (
@@ -158,7 +154,7 @@ export default function Showcase() {
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [0, 1, 12], fov: 45 }} // Standard FOV and moved back slightly
+          camera={{ position: [0, 5, 60], fov: 45 }} // Significantly further initial position
           dpr={[1, 2]}
         >
           <color attach="background" args={['#050506']} />
@@ -170,7 +166,6 @@ export default function Showcase() {
               polar={[-Math.PI / 6, Math.PI / 6]}
               azimuth={[-Math.PI / 1.5, Math.PI / 1.5]}
             >
-              {/* Stage handles lighting and environment mapping to the model */}
               <Stage 
                 preset="rembrandt"
                 intensity={1} 
@@ -198,8 +193,8 @@ export default function Showcase() {
             makeDefault
             enableZoom={true} 
             enablePan={true}
-            minDistance={2} // Lowered for closer inspection
-            maxDistance={25} // Expanded for wider pull-back
+            minDistance={2} 
+            maxDistance={150} // Massive zoom out capability
             autoRotate={!isExplored}
             autoRotateSpeed={0.8} 
             target={[0, 0, 0]} 
