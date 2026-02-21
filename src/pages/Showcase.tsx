@@ -232,10 +232,10 @@ export default function Showcase() {
             makeDefault
             enableZoom={true} 
             enablePan={true}
-            minDistance={2} 
-            maxDistance={500}
-            autoRotate={!isExplored}
-            autoRotateSpeed={0.8} 
+            minDistance={5} 
+            maxDistance={100}
+            autoRotate={true}
+            autoRotateSpeed={0.4} 
           />
           <Environment preset="night" />
         </Canvas>

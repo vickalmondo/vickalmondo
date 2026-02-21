@@ -11,10 +11,10 @@ interface CameraHandlerProps {
 }
 
 const VIEW_CONFIGS: Record<ViewType, { position: [number, number, number]; target: [number, number, number] }> = {
-  front: { position: [0, 0.5, 8], target: [0, 0, 0] },
-  top: { position: [0, 10, 0], target: [0, 0, 0] },
-  side: { position: [10, 0.5, 0], target: [0, 0, 0] },
-  perspective: { position: [8, 4, 8], target: [0, 0, 0] },
+  front: { position: [0, 1, 18], target: [0, 0, 0] },
+  top: { position: [0, 25, 0], target: [0, 0, 0] },
+  side: { position: [22, 1, 0], target: [0, 0, 0] },
+  perspective: { position: [18, 10, 18], target: [0, 0, 0] },
 };
 
 const CameraHandler = ({ view }: CameraHandlerProps) => {
@@ -30,12 +30,12 @@ const CameraHandler = ({ view }: CameraHandlerProps) => {
 
   useFrame((state) => {
     // Smoothly interpolate camera position
-    camera.position.lerp(targetPos, 0.1);
+    camera.position.lerp(targetPos, 0.05);
     
     // If controls exist (OrbitControls), update their target smoothly too
     if (controls) {
       // @ts-ignore - OrbitControls has a target property
-      controls.target.lerp(targetLookAt, 0.1);
+      controls.target.lerp(targetLookAt, 0.05);
       // @ts-ignore
       controls.update();
     } else {
