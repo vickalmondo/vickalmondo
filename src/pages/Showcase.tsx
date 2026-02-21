@@ -6,6 +6,7 @@ import {
   OrbitControls, 
   Stage, 
   useGLTF, 
+  PresentationControls,
   ContactShadows, 
   Html, 
   useProgress,
@@ -18,7 +19,7 @@ import { Box, Maximize, Move, Square } from 'lucide-react';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
- * Optimized for wide-angle viewing and smooth interaction
+ * FIX: Camera Distance and Framing Logic applied
  */
 
 // --- 3D Components ---
@@ -39,11 +40,6 @@ function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
       if ((node as THREE.Mesh).isMesh) {
         node.castShadow = true;
         node.receiveShadow = true;
-        const mesh = node as THREE.Mesh;
-        if (mesh.material) {
-          (mesh.material as THREE.MeshStandardMaterial).envMapIntensity = 2;
-          (mesh.material as THREE.MeshStandardMaterial).roughness = 0.2;
-        }
       }
     });
     return clonedScene;
@@ -61,24 +57,10 @@ function LamborghiniModel({ url, isExplored }: LamborghiniModelProps) {
     <group ref={group} dispose={null}>
       <primitive 
         object={cleanScene} 
-        scale={isExplored ? 1.6 : 1.4} 
+        scale={1.2} 
         position={[0, -0.2, 0]} 
       />
     </group>
-  );
-}
-
-function ModelFallback() {
-  return (
-    <mesh position={[0, 0, 0]}>
-      <boxGeometry args={[2, 0.5, 4]} />
-      <meshStandardMaterial color="#00f2ff" wireframe />
-      <Html center>
-        <div className="bg-black/90 text-[#00f2ff] px-4 py-2 border border-[#00f2ff] text-[10px] font-mono tracking-tighter uppercase whitespace-nowrap">
-          SYSTEM_ERR: LOAD_FAILED
-        </div>
-      </Html>
-    </mesh>
   );
 }
 
@@ -130,10 +112,6 @@ export default function Showcase() {
           <div className="w-10 h-[2px] bg-[#00f2ff] group-hover:w-14 transition-all duration-500"></div>
           <span className="text-xl font-black tracking-widest italic uppercase">KAAZ</span>
         </div>
-        <div className="hidden md:flex items-center gap-8 pointer-events-auto">
-          <button className="text-[8px] font-bold tracking-[0.4em] uppercase opacity-30 hover:opacity-100 transition-all">Specs</button>
-          <button className="px-6 py-2 bg-white text-black text-[8px] font-black tracking-[0.4em] uppercase hover:bg-[#00f2ff] transition-all">Order</button>
-        </div>
       </nav>
 
       {/* UI: SIDE VIEW CONTROLS */}
@@ -152,45 +130,33 @@ export default function Showcase() {
           >
             <option.icon size={14} className="mb-1" />
             <span className="text-[7px] font-black tracking-tighter">{option.label}</span>
-            
-            {/* Tooltip */}
-            <div className="absolute right-full mr-4 px-3 py-1 bg-black border border-white/10 text-[8px] tracking-[0.2em] uppercase opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-              {option.id} View
-            </div>
           </button>
         ))}
       </div>
 
       {/* UI: HERO TEXT */}
-      <div 
-        className={`absolute inset-0 z-20 flex flex-col justify-center px-10 transition-all duration-1000 
-        ${isExplored ? 'opacity-0 -translate-x-20 pointer-events-none' : 'opacity-100 translate-x-0'}`}
-      >
-        <div className="max-w-xl">
-          <h1 className="text-6xl md:text-8xl font-black italic uppercase leading-[0.8] mb-6 select-none">
-            DARK<br />
-            <span className="opacity-20" style={{ WebkitTextStroke: '1px white', color: 'transparent' }}>MATTER.</span>
+      {!isExplored && (
+        <div className="absolute inset-0 z-20 flex flex-col justify-center px-10 pointer-events-none">
+          <h1 className="text-6xl md:text-8xl font-black italic uppercase leading-[0.8] mb-6 select-none opacity-20">
+            DARK<br />MATTER.
           </h1>
-          <p className="text-white/40 text-[11px] leading-relaxed mb-8 tracking-wider max-w-xs uppercase">
-            Aerodynamic excellence forged in the virtual wind tunnel.
-          </p>
           <button 
             onClick={() => {
               setIsExplored(true);
               setCurrentView('perspective');
             }}
-            className="px-10 py-4 border border-[#00f2ff]/40 text-[#00f2ff] font-bold uppercase tracking-[0.3em] text-[9px] hover:bg-[#00f2ff] hover:text-black transition-all"
+            className="pointer-events-auto w-fit px-10 py-4 border border-[#00f2ff]/40 text-[#00f2ff] font-bold uppercase tracking-[0.3em] text-[9px] hover:bg-[#00f2ff] hover:text-black transition-all"
           >
             Examine Chassis
           </button>
         </div>
-      </div>
+      )}
 
       {/* CORE: 3D ENGINE */}
       <div className="absolute inset-0 z-10">
         <Canvas 
           shadows 
-          camera={{ position: [100, 50, 100], fov: 45, far: 2000 }}
+          camera={{ position: [10, 5, 12], fov: 45 }}
           dpr={[1, 2]}
         >
           <color attach="background" args={['#050506']} />
@@ -200,20 +166,25 @@ export default function Showcase() {
             <Stage 
               preset="rembrandt"
               intensity={1} 
-              contactShadow={false}
               shadows="contact"
               adjustCamera={false} 
               environment="city"
             >
-              <ErrorBoundary fallback={<ModelFallback />}>
-                  <LamborghiniModel url={modelPath} isExplored={isExplored} />
-              </ErrorBoundary>
+              <PresentationControls
+                enabled={isExplored}
+                global={false}
+                rotation={[0, -0.4, 0]}
+                polar={[-Math.PI / 4, Math.PI / 4]}
+                azimuth={[-Math.PI / 2, Math.PI / 2]}
+              >
+                <LamborghiniModel url={modelPath} isExplored={isExplored} />
+              </PresentationControls>
             </Stage>
 
             <ContactShadows 
               position={[0, -1.2, 0]} 
-              opacity={0.6} 
-              scale={40} 
+              opacity={0.4} 
+              scale={20} 
               blur={2} 
               color="#000000"
             />
@@ -222,11 +193,12 @@ export default function Showcase() {
           <OrbitControls 
             makeDefault
             enableZoom={true} 
-            enablePan={true}
-            minDistance={10} 
-            maxDistance={1000}
-            autoRotate={true}
-            autoRotateSpeed={0.5} 
+            enablePan={false}
+            minDistance={5} 
+            maxDistance={20}
+            autoRotate={!isExplored}
+            autoRotateSpeed={0.5}
+            target={[0, 0, 0]} 
           />
           <Environment preset="night" />
         </Canvas>
@@ -239,14 +211,13 @@ export default function Showcase() {
             setIsExplored(false);
             setCurrentView('perspective');
           }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 text-white/50 hover:text-[#00f2ff] transition-all group pointer-events-auto"
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 text-white/50 hover:text-[#00f2ff] text-[9px] font-bold uppercase tracking-[0.4em]"
         >
-          <span className="text-[9px] font-bold uppercase tracking-[0.4em]">Return to Hangar</span>
+          Return to Hangar
         </button>
       )}
 
-      {/* VIGNETTE */}
-      <div className="absolute inset-0 pointer-events-none z-50 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]"></div>
+      <div className="absolute inset-0 pointer-events-none z-50 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)]"></div>
     </div>
   );
 }
