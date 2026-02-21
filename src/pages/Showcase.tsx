@@ -15,6 +15,7 @@ import * as THREE from 'three';
 import { useNavigate } from 'react-router-dom';
 import CameraHandler, { ViewType } from '@/components/CameraHandler';
 import { Box, Maximize, Move, Square } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 /**
  * KAAZ AUTOMOTIVE - HYPERCAR SHOWCASE
@@ -109,7 +110,7 @@ export default function Showcase() {
           onClick={() => navigate('/')}
         >
           <div className="w-10 h-[2px] bg-[#00f2ff] group-hover:w-14 transition-all duration-500"></div>
-          <span className="text-xl font-black tracking-widest italic uppercase">KAAZ</span>
+          <Logo className="h-6 text-white" />
         </div>
       </nav>
 

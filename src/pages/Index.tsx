@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { images, svgPaths } from "./kaaz/KaazAssets";
+import { images } from "./kaaz/KaazAssets";
 import { KaazButton } from "./kaaz/KaazButton";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import Specifications from "@/components/Specifications";
+import Logo from "@/components/Logo";
 
 export default function Index() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,12 +29,7 @@ export default function Index() {
 
       <div className="relative z-10 container mx-auto px-6 md:px-12 flex flex-col min-h-screen">
         <header className="flex items-center justify-between py-8">
-          <div className="flex items-center gap-2">
-            <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
-              <path d={svgPaths.logo} />
-            </svg>
-            <span className="text-xl font-bold tracking-widest font-heading">KAAZ</span>
-          </div>
+          <Logo className="h-8 text-white" />
 
           <nav className="hidden md:flex items-center gap-12 text-sm tracking-widest text-gray-400 font-medium">
             <a href="#" className="hover:text-white transition-colors uppercase">The Machine</a>
